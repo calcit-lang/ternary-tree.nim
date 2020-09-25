@@ -13,3 +13,6 @@ test "can add":
   echo initTernaryTreeList[int](@[1,2,3,4,5,6,7,8,9])
   echo initTernaryTreeList[int](@[1,2,3,4,5,6,7,8,9,10,11])
   echo initTernaryTreeList[int](@[1,2,3,4,5,6,7,8,9,10,11]).showLinear
+
+  for x in initTernaryTreeList[int](@[1,2,3,4,5,6,7,8,9,10,11]):
+    echo "item: ", x
