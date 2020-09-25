@@ -52,6 +52,9 @@ proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
 proc `$`*(tree: TernaryTreeList): string =
   fmt"TernaryTreeList[{tree.size}, {tree.depth}]"
 
+proc len*(tree: TernaryTreeList): int =
+  tree.size
+
 proc showLinear*(tree: TernaryTreeList): string =
   if tree.isNil:
     return "nil"
@@ -60,3 +63,41 @@ proc showLinear*(tree: TernaryTreeList): string =
     $tree.value
   of ternaryTreeBranch:
     "(" & tree.left.showLinear & " " & tree.middle.showLinear & " " & tree.right.showLinear & ")"
+
+proc toSeq*[T](tree: TernaryTreeList[T]): seq[T] =
+  var acc: seq[T] = @[]
+  if tree == nil:
+    return acc
+  case tree.kind
+  of ternaryTreeLeaf:
+    acc.add tree.value
+    return acc
+  of ternaryTreeBranch:
+    if tree.left != nil:
+      let xs = tree.left.toSeq
+      for x in xs:
+        acc.add x
+    if tree.middle != nil:
+      let xs = tree.middle.toSeq
+      for x in xs:
+        acc.add x
+    if tree.right != nil:
+      let xs = tree.right.toSeq
+      for x in xs:
+        acc.add x
+    return acc
+
+# recursive iterator not supported, use slow seq for now
+# https://forum.nim-lang.org/t/5697
+iterator items*[T](tree: TernaryTreeList[T]): T =
+  var acc: seq[T] = @[]
+  let seqItems = tree.toSeq()
+
+  for x in seqItems:
+    yield x
+
+# TODO assoc
+# TODO dissoc
+# TODO update
+# TODO assoc-after
+# TODO assoc-before
