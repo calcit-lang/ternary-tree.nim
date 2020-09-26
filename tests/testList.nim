@@ -3,16 +3,100 @@ import unittest
 
 import ternary_tree
 
-test "can add":
-  echo initTernaryTreeList[int](@[])
-  echo initTernaryTreeList[int](@[1])
-  echo initTernaryTreeList[int](@[1,2])
-  echo initTernaryTreeList[int](@[1,2,3])
-  echo initTernaryTreeList[int](@[1,2,3,4])
-  echo initTernaryTreeList[int](@[1,2,3,4,5,6])
-  echo initTernaryTreeList[int](@[1,2,3,4,5,6,7,8,9])
-  echo initTernaryTreeList[int](@[1,2,3,4,5,6,7,8,9,10,11])
-  echo initTernaryTreeList[int](@[1,2,3,4,5,6,7,8,9,10,11]).showLinear
+test "init list":
+  check ($initTernaryTreeList[int](@[1,2,3,4]) == "TernaryTreeList[4, 2]")
 
-  for x in initTernaryTreeList[int](@[1,2,3,4,5,6,7,8,9,10,11]):
-    echo "item: ", x
+  let origin11 = @[1,2,3,4,5,6,7,8,9,10,11]
+  let data11 = initTernaryTreeList[int](origin11)
+
+  check (data11.formatInline == "((1 (2 _ 3) 4) (5 6 7) (8 (9 _ 10) 11))")
+  check (origin11 == data11.toSeq)
+
+test "list operations":
+  let origin11 = @[1,2,3,4,5,6,7,8,9,10,11]
+  let data11 = initTernaryTreeList[int](origin11)
+
+  # get
+  for idx in 0..<origin11.len:
+    check (origin11[idx] == data11.get(idx))
+
+  check (data11.first == 1)
+  check (data11.last == 11)
+
+  # assoc
+  let origin5 = @[1,2,3,4,5]
+  let data5 = initTernaryTreeList(origin5)
+  let updated = data5.assoc(3, 10)
+  check (updated.get(3) == 10)
+  check (data5.get(3) == 4)
+  check (updated.len == data5.len)
+
+  for idx in 0..<data5.len:
+    # echo data5.dissoc(idx).formatInline
+    check data5.dissoc(idx).len == (data5.len - 1)
+
+  check data5.formatInline == "((1 _ 2) 3 (4 _ 5))"
+  check data5.dissoc(0).formatInline == "(2 3 (4 _ 5))"
+  check data5.dissoc(1).formatInline == "(1 3 (4 _ 5))"
+  check data5.dissoc(2).formatInline == "((1 _ 2) _ (4 _ 5))"
+  check data5.dissoc(3).formatInline == "((1 _ 2) 3 5)"
+  check data5.dissoc(4).formatInline == "((1 _ 2) 3 4)"
+
+  check initTernaryTreeList(@[1]).rest.formatInline == "(_ _ _)"
+  check initTernaryTreeList(@[1,2]).rest.formatInline == "2"
+  check initTernaryTreeList(@[1,2,3]).rest.formatInline == "(_ 2 3)"
+  check initTernaryTreeList(@[1,2,3,4]).rest.formatInline == "(_ (2 _ 3) 4)"
+  check initTernaryTreeList(@[1,2,3,4,5]).rest.formatInline == "(2 3 (4 _ 5))"
+
+  check initTernaryTreeList(@[1]).butlast.formatInline == "(_ _ _)"
+  check initTernaryTreeList(@[1,2]).butlast.formatInline == "1"
+  check initTernaryTreeList(@[1,2,3]).butlast.formatInline == "(1 2 _)"
+  check initTernaryTreeList(@[1,2,3,4]).butlast.formatInline == "(1 (2 _ 3) _)"
+  check initTernaryTreeList(@[1,2,3,4,5]).butlast.formatInline == "((1 _ 2) 3 4)"
+
+test "list insertions":
+  let origin5 = @[1,2,3,4,5]
+  let data5 = initTernaryTreeList(origin5)
+
+  check data5.formatInline == "((1 _ 2) 3 (4 _ 5))"
+
+  check data5.insert(0, 10, false).formatInline == "(((10 1 _) _ 2) 3 (4 _ 5))"
+  check data5.insert(0, 10, true).formatInline  == "(((_ 1 10) _ 2) 3 (4 _ 5))"
+  check data5.insert(1, 10, false).formatInline == "((1 _ (10 2 _)) 3 (4 _ 5))"
+  check data5.insert(1, 10, true).formatInline  == "((1 _ (_ 2 10)) 3 (4 _ 5))"
+  check data5.insert(2, 10, false).formatInline == "((1 _ 2) (10 3 _) (4 _ 5))"
+  check data5.insert(2, 10, true).formatInline  == "((1 _ 2) (_ 3 10) (4 _ 5))"
+  check data5.insert(3, 10, false).formatInline == "((1 _ 2) 3 ((10 4 _) _ 5))"
+  check data5.insert(3, 10, true).formatInline  == "((1 _ 2) 3 ((_ 4 10) _ 5))"
+  check data5.insert(4, 10, false).formatInline == "((1 _ 2) 3 (4 _ (10 5 _)))"
+  check data5.insert(4, 10, true).formatInline  == "((1 _ 2) 3 (4 _ (_ 5 10)))"
+
+  let origin4 = @[1,2,3,4]
+  let data4 = initTernaryTreeList(origin4)
+
+  check data4.assocBefore(3, 10).formatInline == "(1 (2 _ 3) (10 4 _))"
+  check data4.assocAfter(3, 10).formatInline == "(1 (2 _ 3) (_ 4 10))"
+
+  check data4.prepend(10).formatInline == "((10 1 _) (2 _ 3) 4)"
+  check data4.append(10).formatInline == "(1 (2 _ 3) (_ 4 10))"
+
+  let origin2 = @[1,2]
+  let data2 = initTernaryTreeList(origin2)
+  check data2.concat(data4).formatInline == "((1 _ 2) _ (1 (2 _ 3) 4))"
+
+  check initTernaryTreeList[int](@[]).concat(data2).formatInline == "(1 _ 2)"
+
+test "check equality":
+
+  let origin4 = @[1,2,3,4]
+  let data4 = initTernaryTreeList(origin4)
+  let data4n = initTernaryTreeList(origin4)
+  let data4Made = initTernaryTreeList(@[2,3,4]).prepend(1)
+
+  check data4.sameShape(data4) == true
+  check data4.sameShape(data4n) == true
+  check data4.sameShape(data4Made) == false
+
+  check (data4 == data4n)
+  check (data4 == data4Made)
+  check (data4n == data4Made)
