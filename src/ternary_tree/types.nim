@@ -15,19 +15,19 @@ type
     of ternaryTreeLeaf:
       value*: T
 
-  TernaryTreeMap*[T] = ref object
+  TernaryTreeMap*[K, T] = ref object
     depth*: int
     size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
-      max*: int
-      min*: int
-      left*: TernaryTreeMap[T]
-      middle*: TernaryTreeMap[T]
-      right*: TernaryTreeMap[T]
+      maxHash*: int
+      minHash*: int
+      left*: TernaryTreeMap[K, T]
+      middle*: TernaryTreeMap[K, T]
+      right*: TernaryTreeMap[K, T]
     of ternaryTreeLeaf:
       hash*: int
-      key*: T
+      key*: K
       value*: T
 
   TernaryTreeSet*[T] = ref object
@@ -37,9 +37,14 @@ type
     of ternaryTreeBranch:
       max*: int
       min*: int
-      left*: TernaryTreeMap[T]
-      middle*: TernaryTreeMap[T]
-      right*: TernaryTreeMap[T]
+      left*: TernaryTreeSet[T]
+      middle*: TernaryTreeSet[T]
+      right*: TernaryTreeSet[T]
     of ternaryTreeLeaf:
       hash*: int
       value*: T
+
+type TernaryTreeMapKeyValuePair*[K, V] = tuple
+  k: K
+  v: V
+
