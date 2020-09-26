@@ -3,8 +3,10 @@ import strformat
 import math
 
 import ternary_tree/types
+import ternary_tree/map
 
 export TernaryTreeList, TernaryTreeKind
+export initTernaryTreeMap, TernaryTreeMapKeyValuePair, `$`, formatInline
 
 proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
   let size = xs.len
@@ -408,12 +410,20 @@ proc assocAfter*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = f
 
 # this function mutates original tree to make it more balanced
 proc forceInplaceBalancing*[T](tree: TernaryTreeList[T]): void =
-  echo "Force inplace balancing of list"
+  # echo "Force inplace balancing of list"
   let xs = tree.toSeq
   let newTree = initTernaryTreeList(xs)
   tree.left = newTree.left
   tree.middle = newTree.middle
   tree.right = newTree.right
+
+proc roughIntPow(x: int, times: int): int =
+  if times < 1:
+    return x
+
+  result = 1
+  for idx in 0..<times:
+    result = result * x
 
 proc prepend*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = false): TernaryTreeList[T] =
   if tree.isNil or tree.len == 0:
@@ -421,7 +431,7 @@ proc prepend*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = fal
   result = insert(tree, 0, item, false)
 
   if (not disableBalancing) and result.depth > 27:
-    if 3.float.pow((result.depth - 9).float) > result.size.float:
+    if 3.roughIntPow(result.depth - 9) > result.size:
       result.forceInplaceBalancing
 
 proc append*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = false): TernaryTreeList[T] =
@@ -430,7 +440,7 @@ proc append*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = fals
   result = insert(tree, tree.len - 1, item, true)
 
   if (not disableBalancing) and result.depth > 27:
-    if 3.float.pow((result.depth - 9).float) > result.size.float:
+    if 3.roughIntPow(result.depth - 9) > result.size:
       result.forceInplaceBalancing
 
 proc concat*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): TernaryTreeList[T] =
@@ -492,3 +502,5 @@ proc `==`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
   return true
 
 # TODO hash for fast comparing
+
+# TODO slice
