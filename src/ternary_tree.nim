@@ -406,11 +406,32 @@ proc assocBefore*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = 
 proc assocAfter*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false): TernaryTreeList[T] =
   insert(tree, idx, item, true)
 
-proc prepend*[T](tree: TernaryTreeList[T], item: T): TernaryTreeList[T] =
-  insert(tree, 0, item, false)
+# this function mutates original tree to make it more balanced
+proc forceInplaceBalancing*[T](tree: TernaryTreeList[T]): void =
+  echo "Force inplace balancing of list"
+  let xs = tree.toSeq
+  let newTree = initTernaryTreeList(xs)
+  tree.left = newTree.left
+  tree.middle = newTree.middle
+  tree.right = newTree.right
 
-proc append*[T](tree: TernaryTreeList[T], item: T): TernaryTreeList[T] =
-  insert(tree, tree.len - 1, item, true)
+proc prepend*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = false): TernaryTreeList[T] =
+  if tree.isNil or tree.len == 0:
+    return TernaryTreeList[T](kind: ternaryTreeLeaf, depth: 1, size: 1, value: item)
+  result = insert(tree, 0, item, false)
+
+  if (not disableBalancing) and result.depth > 27:
+    if 3.float.pow((result.depth - 9).float) > result.size.float:
+      result.forceInplaceBalancing
+
+proc append*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = false): TernaryTreeList[T] =
+  if tree.isNil or tree.len == 0:
+    return TernaryTreeList[T](kind: ternaryTreeLeaf, depth: 1, size: 1, value: item)
+  result = insert(tree, tree.len - 1, item, true)
+
+  if (not disableBalancing) and result.depth > 27:
+    if 3.float.pow((result.depth - 9).float) > result.size.float:
+      result.forceInplaceBalancing
 
 proc concat*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): TernaryTreeList[T] =
   if xs.isNil or xs.len == 0:
@@ -470,4 +491,4 @@ proc `==`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
 
   return true
 
-# TODO forceBalancing
+# TODO hash for fast comparing

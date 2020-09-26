@@ -100,3 +100,13 @@ test "check equality":
   check (data4 == data4n)
   check (data4 == data4Made)
   check (data4n == data4Made)
+
+test "force balancing":
+  var data = initTernaryTreeList[int](@[])
+  for idx in 0..<20:
+    data = data.append(idx, true)
+  # echo data.formatInline
+  check data.formatInline == "(_ 0 (_ 1 (_ 2 (_ 3 (_ 4 (_ 5 (_ 6 (_ 7 (_ 8 (_ 9 (_ 10 (_ 11 (_ 12 (_ 13 (_ 14 (_ 15 (_ 16 (_ 17 (_ 18 19)))))))))))))))))))"
+  data.forceInplaceBalancing
+  check data.formatInline == "(((0 _ 1) (2 3 4) (5 _ 6)) ((7 _ 8) (9 _ 10) (11 _ 12)) ((13 _ 14) (15 16 17) (18 _ 19)))"
+  # echo data.formatInline
