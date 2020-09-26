@@ -1,9 +1,16 @@
 
+import tables
+import options
 import math
 import hashes
 import strformat
+import algorithm
 
 import ./types
+
+type TernaryTreeMapKeyValuePair[K, V] = tuple
+  k: K
+  v: V
 
 proc getMax(tree: TernaryTreeMap): int =
   if tree.isNil:
@@ -23,7 +30,9 @@ proc getMin(tree: TernaryTreeMap): int =
   of ternaryTreeBranch:
     tree.minHash
 
-proc initTernaryTreeMap*[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): TernaryTreeMap[K, T] =
+# this proc is not exported, pick up next proc as the entry.
+# pairs must be sorted before passing to proc.
+proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): TernaryTreeMap[K, T] =
   let size = xs.len
 
   case size
@@ -116,6 +125,20 @@ proc initTernaryTreeMap*[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Terna
       left: left, middle: middle, right: right
     )
 
+proc initTernaryTreeMap*[K, T](t: Table[K, T]): TernaryTreeMap[K, T] =
+  var xs: seq[TernaryTreeMapKeyValuePair[K, T]]
+
+  for k, v in t:
+    xs.add((k,v))
+
+  let ys = xs.sorted(proc(x, y: TernaryTreeMapKeyValuePair[K, T]): int =
+    let hx = x.k.hash
+    let hy = y.k.hash
+    cmp(hx, hy)
+  )
+
+  initTernaryTreeMap(ys)
+
 proc `$`*(tree: TernaryTreeMap): string =
   fmt"TernaryTreeMap[{tree.size}, {tree.depth}]"
 
@@ -130,13 +153,90 @@ proc formatInline*(tree: TernaryTreeMap): string =
     return "_"
   case tree.kind
   of ternaryTreeLeaf:
-    fmt"{tree.key}:{tree.value}"
+    fmt"{tree.hash}->{tree.key}:{tree.value}"
   of ternaryTreeBranch:
     "(" & tree.left.formatInline & " " & tree.middle.formatInline & " " & tree.right.formatInline & ")"
 
-# TODO init
-# TODO get
+# sorted by hash(tree.key)
+proc toSortedSeq*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePair[K, T]] =
+
+  if tree.isNil or tree.len == 0:
+    return @[]
+
+  if tree.kind == ternaryTreeLeaf:
+    return @[(tree.key, tree.value)]
+
+  var acc: seq[TernaryTreeMapKeyValuePair[K, T]]
+
+  for item in tree.left.toSortedSeq:
+    acc.add item
+
+  for item in tree.middle.toSortedSeq:
+    acc.add item
+
+  for item in tree.right.toSortedSeq:
+    acc.add item
+
+  return acc
+
+proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
+  let hx = item.hash
+  # echo "looking for: ", hx, " ", item
+  if not tree.left.isNil:
+    if tree.left.kind == ternaryTreeLeaf:
+      return tree.left.hash == hx:
+    elif hx >= tree.left.minHash and hx <= tree.left.maxHash:
+      return tree.left.contains(item)
+
+  if not tree.middle.isNil:
+    if tree.middle.kind == ternaryTreeLeaf:
+      return tree.middle.hash == hx:
+    elif hx >= tree.middle.minHash and hx <= tree.middle.maxHash:
+      return tree.middle.contains(item)
+
+  if not tree.right.isNil:
+    if tree.right.kind == ternaryTreeLeaf:
+      return tree.right.hash == hx:
+    elif hx >= tree.right.minHash and hx <= tree.right.maxHash:
+      return tree.right.contains(item)
+
+  return false
+
+proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
+  let hx = item.hash
+  # echo "looking for: ", hx, " ", item
+  if not tree.left.isNil:
+    if tree.left.kind == ternaryTreeLeaf:
+      if tree.left.hash == hx:
+        return some(tree.left.value)
+      else:
+        return none(T)
+    elif hx >= tree.left.minHash and hx <= tree.left.maxHash:
+      return tree.left.get(item)
+
+  if not tree.middle.isNil:
+    if tree.middle.kind == ternaryTreeLeaf:
+      if tree.middle.hash == hx:
+        return some(tree.middle.value)
+      else:
+        return none(T)
+    elif hx >= tree.middle.minHash and hx <= tree.middle.maxHash:
+      return tree.middle.get(item)
+
+  if not tree.right.isNil:
+    if tree.right.kind == ternaryTreeLeaf:
+      if tree.right.hash == hx:
+        return some(tree.right.value)
+      else:
+        return none(T)
+    elif hx >= tree.right.minHash and hx <= tree.right.maxHash:
+      return tree.right.get(item)
+
+  return none(T)
+
+
 # TODO contains
+# TODO get
 # TODO assoc
 # TODO dissoc
 # TODO merge

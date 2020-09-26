@@ -43,8 +43,3 @@ type
     of ternaryTreeLeaf:
       hash*: int
       value*: T
-
-type TernaryTreeMapKeyValuePair*[K, V] = tuple
-  k: K
-  v: V
-
