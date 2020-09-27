@@ -110,3 +110,13 @@ test "force balancing":
   data.forceInplaceBalancing
   check data.formatInline == "(((0 _ 1) (2 3 4) (5 _ 6)) ((7 _ 8) (9 _ 10) (11 _ 12)) ((13 _ 14) (15 16 17) (18 _ 19)))"
   # echo data.formatInline
+
+test "iterator":
+  let origin4 = @[1,2,3,4]
+  let data4 = initTernaryTreeList(origin4)
+
+  var i = 0
+  for item in data4:
+    i = i + 1
+
+  check (i == 4)

@@ -526,6 +526,12 @@ proc toPairs*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePair[
     for item in tree.right.toPairs:
       result.add item
 
+iterator pairs*[K, T](tree: TernaryTreeMap[K, T]): TernaryTreeMapKeyValuePair[K, T] =
+  let seqItems = tree.toHashSortedSeq()
+
+  for x in seqItems:
+    yield (x.k, x.v)
+
 proc keys*[K, T](tree: TernaryTreeMap[K, T]): seq[K] =
   if tree.isNil:
     return @[]

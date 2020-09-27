@@ -118,3 +118,18 @@ test "Merge":
   let both = initTernaryTreeMap(dictBoth)
 
   check (merged == both)
+
+test "iterator":
+  var dict: Table[string, int]
+  var dictBoth: Table[string, int]
+  for idx in 0..<4:
+    dict[fmt"{idx}"] = idx + 10
+    dictBoth[fmt"{idx}"] = idx + 10
+
+  let data = initTernaryTreeMap(dict)
+
+  var i = 0
+  for k, v in data:
+    i = i + 1
+
+  check (i == 4)

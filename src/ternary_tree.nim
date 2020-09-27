@@ -9,7 +9,7 @@ import ternary_tree/utils
 export TernaryTreeList, TernaryTreeKind
 
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge
-export forceInplaceBalancing, sameShape
+export forceInplaceBalancing, sameShape, pairs
 
 proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
   let size = xs.len
@@ -97,7 +97,6 @@ proc toSeq*[T](tree: TernaryTreeList[T]): seq[T] =
 # recursive iterator not supported, use slow seq for now
 # https://forum.nim-lang.org/t/5697
 iterator items*[T](tree: TernaryTreeList[T]): T =
-  var acc: seq[T] = @[]
   let seqItems = tree.toSeq()
 
   for x in seqItems:
