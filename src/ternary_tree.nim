@@ -4,9 +4,12 @@ import math
 
 import ternary_tree/types
 import ternary_tree/map
+import ternary_tree/utils
 
 export TernaryTreeList, TernaryTreeKind
+
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge
+export forceInplaceBalancing, sameShape
 
 proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
   let size = xs.len
@@ -417,14 +420,6 @@ proc forceInplaceBalancing*[T](tree: TernaryTreeList[T]): void =
   tree.middle = newTree.middle
   tree.right = newTree.right
 
-proc roughIntPow(x: int, times: int): int =
-  if times < 1:
-    return x
-
-  result = 1
-  for idx in 0..<times:
-    result = result * x
-
 proc prepend*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = false): TernaryTreeList[T] =
   if tree.isNil or tree.len == 0:
     return TernaryTreeList[T](kind: ternaryTreeLeaf, depth: 1, size: 1, value: item)
@@ -501,6 +496,7 @@ proc `==`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
 
   return true
 
-# TODO hash for fast comparing
-
 # TODO slice
+
+# TODO, do comparing faster
+

@@ -94,6 +94,12 @@ test "Equality":
   check (data == data)
   check (data != b)
 
+  # TODO, handle failures in "3"
+  let c = data.assoc("4", 15)
+  check (data.sameShape(data))
+  check (data.sameShape(b) == false)
+  check (data.sameShape(c) == false)
+
 test "Merge":
   var dict: Table[string, int]
   var dictBoth: Table[string, int]

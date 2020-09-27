@@ -7,6 +7,7 @@ import strformat
 import algorithm
 
 import ./types
+import ./utils
 
 type TernaryTreeMapKeyValuePair[K, V] = tuple
   k: K
@@ -408,14 +409,18 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
     right: tree.right
   )
 
-proc assoc*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMap[K, T] =
+proc assoc*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T, disableBalancing: bool = false): TernaryTreeMap[K, T] =
   if tree.isNil or tree.len == 0:
     return createLeaf(key, item)
 
   if tree.contains(key):
-    tree.assocExisted(key, item)
+    result = tree.assocExisted(key, item)
   else:
-    tree.assocNew(key, item)
+    result = tree.assocNew(key, item)
+
+  if (not disableBalancing) and result.depth > 27:
+    if 3.roughIntPow(result.depth - 9) > result.size:
+      result.forceInplaceBalancing
 
 proc getDepth*(tree: TernaryTreeMap): int =
   if tree.isNil:
@@ -559,5 +564,50 @@ proc merge*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): TernaryTre
     else:
       raise newException(ValueError, "Unexpected nil value during merge")
 
-# TODO forceInplaceBalancing
-# TODO sameShape
+# this function mutates original tree to make it more balanced
+proc forceInplaceBalancing*[K,T](tree: TernaryTreeMap[K,T]): void =
+  # echo "Force inplace balancing of list"
+  let xs = tree.toHashSortedSeq
+  let newTree = initTernaryTreeMap(xs)
+  tree.left = newTree.left
+  tree.middle = newTree.middle
+  tree.right = newTree.right
+
+proc sameShape*[K,T](xs: TernaryTreeMap[K,T], ys: TernaryTreeMap[K,T]): bool =
+  if xs.isNil:
+    if ys.isNil:
+      return true
+    else:
+      return false
+  if ys.isNil:
+    return false
+
+  if xs.len != ys.len:
+    return false
+
+  if xs.depth != ys.depth:
+    return false
+
+  if xs.kind != ys.kind:
+    return false
+
+  if xs.kind == ternaryTreeLeaf:
+    if xs.key != ys.key:
+      return false
+    elif xs.value != ys.value:
+      return false
+    else:
+      return true
+
+  if not xs.left.sameShape(ys.left):
+    return false
+
+  if not xs.middle.sameShape(ys.middle):
+    return false
+
+  if not xs.right.sameShape(ys.right):
+    return false
+
+  return true
+
+# TODO, do comparing faster
