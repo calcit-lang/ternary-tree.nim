@@ -545,6 +545,12 @@ proc keys*[K, T](tree: TernaryTreeMap[K, T]): seq[K] =
     for item in tree.right.keys:
       result.add item
 
+iterator items*[K, T](tree: TernaryTreeMap[K, T]): K =
+  let seqItems = tree.keys()
+
+  for x in seqItems:
+    yield x
+
 proc `$`*[K,V](p: TernaryTreeMapKeyValuePair[K, V]): string =
   fmt"{p.k}:{p.v}"
 

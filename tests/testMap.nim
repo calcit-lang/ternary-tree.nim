@@ -133,3 +133,8 @@ test "iterator":
     i = i + 1
 
   check (i == 4)
+
+  i = 0
+  for key in data:
+    i = i + 1
+  check (i == 4)

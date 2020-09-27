@@ -120,3 +120,9 @@ test "iterator":
     i = i + 1
 
   check (i == 4)
+
+  i = 0
+  for idx, item in data4:
+    i = i + idx
+
+  check (i == 6)

@@ -9,7 +9,7 @@ import ternary_tree/utils
 export TernaryTreeList, TernaryTreeKind
 
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge
-export forceInplaceBalancing, sameShape, pairs
+export forceInplaceBalancing, sameShape, pairs, items
 
 proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
   let size = xs.len
@@ -101,6 +101,12 @@ iterator items*[T](tree: TernaryTreeList[T]): T =
 
   for x in seqItems:
     yield x
+
+iterator pairs*[T](tree: TernaryTreeList[T]): tuple[k: int, v: T] =
+  let seqItems = tree.toSeq()
+
+  for idx, x in seqItems:
+    yield (idx, x)
 
 proc get*[T](tree: TernaryTreeList[T], idx: int): T =
   if idx < 0:
