@@ -50,3 +50,24 @@ test "assoc map":
 
   check data.assoc("1", 2222).formatInline(false) == "((2:12 3:13 7:17) ((_ 9:19 _) (6:16 _ 5:15) (_ 1:2222 _)) (8:18 0:10 4:14))"
   check data.assoc("23", 2222).formatInline(false) == "((2:12 3:13 7:17) ((_ 9:19 _) (6:16 _ 5:15) (23:2222 (_ 1:11 _) _)) (8:18 0:10 4:14))"
+
+test "dissoc":
+
+  var dict: Table[string, int]
+  for idx in 0..<10:
+    dict[fmt"{idx}"] = idx + 10
+
+  let data = initTernaryTreeMap(dict)
+
+  # echo data.formatInline
+
+  for idx in 0..<10:
+    let v = data.dissoc(fmt"{idx}")
+    check v.contains(fmt"{idx}") == false
+    check data.contains(fmt"{idx}") == true
+    check v.len == (data.len - 1)
+
+  for idx in 10..<12:
+    let v = data.dissoc(fmt"{idx}")
+    check v.contains(fmt"{idx}") == false
+    check v.len == data.len

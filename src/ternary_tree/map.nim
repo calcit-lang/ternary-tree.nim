@@ -168,6 +168,9 @@ proc toSortedSeq*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValueP
   return acc
 
 proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
+  if tree.isNil:
+    return false
+
   let hx = item.hash
   # echo "looking for: ", hx, " ", item, " in ", tree.formatInline(true)
   if not tree.left.isNil:
@@ -420,6 +423,100 @@ proc assoc*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMap[K
   else:
     tree.assocNew(key, item)
 
+proc getDepth*(tree: TernaryTreeMap): int =
+  if tree.isNil:
+    0
+  else:
+    tree.depth
+
+proc maxDepthOf3(left: TernaryTreeMap, middle: TernaryTreeMap, right: TernaryTreeMap): int =
+  max(@[left.getDepth, middle.getDepth, right.getDepth])
+
+proc dissocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K, T] =
+  if tree.isNil:
+    raise newException(ValueError, "Unexpected missing key in dissoc")
+
+  if tree.kind == ternaryTreeLeaf:
+    if tree.key == key:
+      return nil
+    else:
+      raise newException(ValueError, "Unexpected missing key in dissoc on leaf")
+
+  if tree.len == 1:
+    if not tree.contains(key):
+      raise newException(ValueError, "Unexpected missing key in dissoc single branch")
+    return nil
+
+  let thisHash = key.hash
+
+  if tree.left.rangeContainsHash(thisHash):
+    let changedBranch = tree.left.dissocExisted(key)
+    let nextDepth = maxDepthOf3(changedBranch, tree.middle, tree.right)
+
+    var minHash: int
+    if not changedBranch.isNil:
+      minHash = changedBranch.getMin
+    elif not tree.middle.isNil:
+      minHash = tree.middle.getMin
+    else:
+      minHash = tree.right.getMin
+
+    return TernaryTreeMap[K, T](
+      kind: ternaryTreeBranch, size: tree.size - 1, depth: nextDepth,
+      maxHash: tree.maxHash,
+      minHash: minHash,
+      left: changedBranch,
+      middle: tree.middle,
+      right: tree.right
+    )
+
+  if tree.middle.rangeContainsHash(thisHash):
+    let changedBranch = tree.middle.dissocExisted(key)
+    let nextDepth = maxDepthOf3(tree.left, changedBranch, tree.right)
+
+    return TernaryTreeMap[K, T](
+      kind: ternaryTreeBranch, size: tree.size - 1, depth: nextDepth,
+      maxHash: tree.getMax,
+      minHash: tree.minHash,
+      left: tree.left,
+      middle: changedBranch,
+      right: tree.right
+    )
+
+  if tree.right.rangeContainsHash(thisHash):
+    let changedBranch = tree.right.dissocExisted(key)
+    let nextDepth = maxDepthOf3(tree.left, tree.middle, changedBranch)
+
+    var maxHash: int
+    if not changedBranch.isNil:
+      maxHash = changedBranch.getMax
+    elif not tree.middle.isNil:
+      maxHash = tree.middle.getMax
+    else:
+      maxHash = tree.left.getMax
+
+    return TernaryTreeMap[K, T](
+      kind: ternaryTreeBranch, size: tree.size - 1, depth: nextDepth,
+      maxHash: maxHash,
+      minHash: tree.minHash,
+      left: tree.left,
+      middle: tree.middle,
+      right: changedBranch
+    )
+
+  raise newException(ValueError, "Cannot find branch in dissoc")
+
+
+proc dissoc*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K, T] =
+  if tree.contains(key):
+    tree.dissocExisted(key)
+  else:
+    tree
+
 # TODO dissoc
 # TODO merge
 # TODO pairs
+# TODO forceInplaceBalancing
+# TODO ==
+# TODO sameShape
+# TODO keys
