@@ -224,6 +224,9 @@ proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
 
   return none(T)
 
+proc `[]`*[K, T](tree: TernaryTreeMap[K, T], key: K): Option[T] =
+  tree.get(key)
+
 # leaves on the left has smaller hashes
 # TODO check sizes, depth, hashes
 proc checkStructure*(tree: TernaryTreeMap): bool =

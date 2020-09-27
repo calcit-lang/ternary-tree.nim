@@ -19,6 +19,7 @@ test "list operations":
   # get
   for idx in 0..<origin11.len:
     check (origin11[idx] == data11.get(idx))
+    check (origin11[idx] == data11[idx])
 
   check (data11.first == 1)
   check (data11.last == 11)

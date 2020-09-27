@@ -9,7 +9,7 @@ import ternary_tree/utils
 export TernaryTreeList, TernaryTreeKind
 
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge
-export forceInplaceBalancing, sameShape, pairs, items
+export forceInplaceBalancing, sameShape, pairs, items, `[]`
 
 proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
   let size = xs.len
@@ -80,15 +80,15 @@ proc toSeq*[T](tree: TernaryTreeList[T]): seq[T] =
     acc.add tree.value
     return acc
   of ternaryTreeBranch:
-    if tree.left != nil:
+    if not tree.left.isNil:
       let xs = tree.left.toSeq
       for x in xs:
         acc.add x
-    if tree.middle != nil:
+    if not tree.middle.isNil:
       let xs = tree.middle.toSeq
       for x in xs:
         acc.add x
-    if tree.right != nil:
+    if not tree.right.isNil:
       let xs = tree.right.toSeq
       for x in xs:
         acc.add x
@@ -133,6 +133,9 @@ proc get*[T](tree: TernaryTreeList[T], idx: int): T =
     return tree.middle.get(idx - leftSize)
   else:
     return tree.right.get(idx - leftSize - middleSize)
+
+proc `[]`*[T](tree: TernaryTreeList[T], idx: int): T =
+  tree.get(idx)
 
 proc first*[T](tree: TernaryTreeList[T]): T =
   if tree.len > 0:

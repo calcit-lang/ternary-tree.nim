@@ -32,7 +32,8 @@ test "init map":
   check data10.contains("11") == false
 
   check data10.get("1") == some(11)
-  check data10.get("11") == none(int)
+  check data10["1"] == some(11)
+  check data10["11"] == none(int)
 
   check data10.checkStructure == true
 
