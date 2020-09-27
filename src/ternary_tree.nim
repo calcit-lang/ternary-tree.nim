@@ -497,6 +497,6 @@ proc `==`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
   return true
 
 # TODO slice
+# TODO checkStructure
 
-# TODO, do comparing faster
-
+# TODO do comparing faster

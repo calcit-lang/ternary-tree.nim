@@ -225,6 +225,7 @@ proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
   return none(T)
 
 # leaves on the left has smaller hashes
+# TODO check sizes, depth, hashes
 proc checkStructure*(tree: TernaryTreeMap): bool =
   let xs = tree.toHashSortedSeq
   if xs.len <= 1:
