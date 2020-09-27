@@ -199,13 +199,11 @@ proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
 
 proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
   let hx = item.hash
-  # echo "looking for: ", hx, " ", item
+  # echo "looking for: ", hx, " ", item, " in ", tree.formatInline
   if not tree.left.isNil:
     if tree.left.kind == ternaryTreeLeaf:
       if tree.left.hash == hx:
         return some(tree.left.value)
-      else:
-        return none(T)
     elif hx >= tree.left.minHash and hx <= tree.left.maxHash:
       return tree.left.get(item)
 
@@ -213,8 +211,6 @@ proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
     if tree.middle.kind == ternaryTreeLeaf:
       if tree.middle.hash == hx:
         return some(tree.middle.value)
-      else:
-        return none(T)
     elif hx >= tree.middle.minHash and hx <= tree.middle.maxHash:
       return tree.middle.get(item)
 
@@ -222,8 +218,6 @@ proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
     if tree.right.kind == ternaryTreeLeaf:
       if tree.right.hash == hx:
         return some(tree.right.value)
-      else:
-        return none(T)
     elif hx >= tree.right.minHash and hx <= tree.right.maxHash:
       return tree.right.get(item)
 
@@ -542,7 +536,28 @@ proc keys*[K, T](tree: TernaryTreeMap[K, T]): seq[K] =
 proc `$`*[K,V](p: TernaryTreeMapKeyValuePair[K, V]): string =
   fmt"{p.k}:{p.v}"
 
-# TODO merge
+proc `==`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
+  if xs.len != ys.len:
+    return false
+
+  if xs.len == 0:
+    return true
+
+  let keys = xs.keys
+  for key in keys:
+
+    if xs.get(key) != ys.get(key):
+      return false
+  return true
+
+proc merge*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): TernaryTreeMap[K, V] =
+  result = xs
+  for key in ys.keys:
+    let item = ys.get(key)
+    if item.isSome:
+      result = result.assoc(key, ys.get(key).get)
+    else:
+      raise newException(ValueError, "Unexpected nil value during merge")
+
 # TODO forceInplaceBalancing
-# TODO ==
 # TODO sameShape

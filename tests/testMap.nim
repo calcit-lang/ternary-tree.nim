@@ -82,3 +82,34 @@ test "to seq":
 
   check ($data.toPairs == "@[2:12, 3:13, 7:17, 9:19, 6:16, 5:15, 1:11, 8:18, 0:10, 4:14]")
   check (data.keys == @["2", "3", "7", "9", "6", "5", "1", "8", "0", "4"])
+
+test "Equality":
+  var dict: Table[string, int]
+  for idx in 0..<10:
+    dict[fmt"{idx}"] = idx + 10
+
+  let data = initTernaryTreeMap(dict)
+  let b = data.dissoc("3")
+
+  check (data == data)
+  check (data != b)
+
+test "Merge":
+  var dict: Table[string, int]
+  var dictBoth: Table[string, int]
+  for idx in 0..<4:
+    dict[fmt"{idx}"] = idx + 10
+    dictBoth[fmt"{idx}"] = idx + 10
+
+  let data = initTernaryTreeMap(dict)
+
+  var dictB: Table[string, int]
+  for idx in 10..<14:
+    dictB[fmt"{idx}"] = idx + 23
+    dictBoth[fmt"{idx}"] = idx + 23
+  let b = initTernaryTreeMap(dictB)
+
+  let merged = data.merge(b)
+  let both = initTernaryTreeMap(dictBoth)
+
+  check (merged == both)
