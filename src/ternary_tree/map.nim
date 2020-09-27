@@ -111,7 +111,7 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
     TernaryTreeMap[K, T](
       kind: ternaryTreeBranch, size: size, depth: parentDepth,
       maxHash: right.getMax,
-      minHash: left.getMax,
+      minHash: left.getMin,
       left: left, middle: middle, right: right
     )
 
