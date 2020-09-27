@@ -26,7 +26,7 @@ test "init map":
   # echo data10
   check data10.formatInline == "((2:12 3:13 7:17) ((_ 9:19 _) (6:16 _ 5:15) (_ 1:11 _)) (8:18 0:10 4:14))"
 
-  check data10.toSortedSeq == inList
+  check data10.toHashSortedSeq == inList
 
   check data10.contains("1") == true
   check data10.contains("11") == false
@@ -71,3 +71,14 @@ test "dissoc":
     let v = data.dissoc(fmt"{idx}")
     check v.contains(fmt"{idx}") == false
     check v.len == data.len
+
+test "to seq":
+
+  var dict: Table[string, int]
+  for idx in 0..<10:
+    dict[fmt"{idx}"] = idx + 10
+
+  let data = initTernaryTreeMap(dict)
+
+  check ($data.toPairs == "@[2:12, 3:13, 7:17, 9:19, 6:16, 5:15, 1:11, 8:18, 0:10, 4:14]")
+  check (data.keys == @["2", "3", "7", "9", "6", "5", "1", "8", "0", "4"])

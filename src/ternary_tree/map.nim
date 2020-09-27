@@ -150,7 +150,7 @@ proc formatInline*(tree: TernaryTreeMap, withHash: bool = false): string =
     "(" & tree.left.formatInline(withHash) & " " & tree.middle.formatInline(withHash) & " " & tree.right.formatInline(withHash) & ")"
 
 # sorted by hash(tree.key)
-proc toSortedSeq*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePair[K, T]] =
+proc toHashSortedSeq*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePair[K, T]] =
   if tree.isNil or tree.len == 0:
     return @[]
   if tree.kind == ternaryTreeLeaf:
@@ -158,11 +158,11 @@ proc toSortedSeq*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValueP
 
   var acc: seq[TernaryTreeMapKeyValuePair[K, T]]
 
-  for item in tree.left.toSortedSeq:
+  for item in tree.left.toHashSortedSeq:
     acc.add item
-  for item in tree.middle.toSortedSeq:
+  for item in tree.middle.toHashSortedSeq:
     acc.add item
-  for item in tree.right.toSortedSeq:
+  for item in tree.right.toHashSortedSeq:
     acc.add item
 
   return acc
@@ -231,7 +231,7 @@ proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
 
 # leaves on the left has smaller hashes
 proc checkStructure*(tree: TernaryTreeMap): bool =
-  let xs = tree.toSortedSeq
+  let xs = tree.toHashSortedSeq
   if xs.len <= 1:
     return true
   var x0 = xs[0]
@@ -513,10 +513,36 @@ proc dissoc*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K, T] =
   else:
     tree
 
-# TODO dissoc
+proc toPairs*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePair[K, T]] =
+  if tree.isNil:
+    return @[]
+  if tree.kind == ternaryTreeLeaf:
+    result.add((k: tree.key, v: tree.value))
+  else:
+    for item in tree.left.toPairs:
+      result.add item
+    for item in tree.middle.toPairs:
+      result.add item
+    for item in tree.right.toPairs:
+      result.add item
+
+proc keys*[K, T](tree: TernaryTreeMap[K, T]): seq[K] =
+  if tree.isNil:
+    return @[]
+  if tree.kind == ternaryTreeLeaf:
+    result.add(tree.key)
+  else:
+    for item in tree.left.keys:
+      result.add item
+    for item in tree.middle.keys:
+      result.add item
+    for item in tree.right.keys:
+      result.add item
+
+proc `$`*[K,V](p: TernaryTreeMapKeyValuePair[K, V]): string =
+  fmt"{p.k}:{p.v}"
+
 # TODO merge
-# TODO pairs
 # TODO forceInplaceBalancing
 # TODO ==
 # TODO sameShape
-# TODO keys
