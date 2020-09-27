@@ -6,7 +6,7 @@ import ternary_tree/types
 import ternary_tree/map
 
 export TernaryTreeList, TernaryTreeKind
-export initTernaryTreeMap, `$`, formatInline, toSortedSeq, contains, get
+export initTernaryTreeMap, `$`, formatInline, toSortedSeq, contains, get, checkStructure
 
 proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
   let size = xs.len
