@@ -25,8 +25,10 @@ TODO:
 
 ### Usages
 
-```bash
-nimble install https://github.com/Cirru/ternary-tree
+Add in nimble file:
+
+```nim
+requires "https://github.com/Cirru/ternary-tree#v0.1.6"
 ```
 
 ```nim

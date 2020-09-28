@@ -6,7 +6,7 @@ import ternary_tree/types
 import ternary_tree/map
 import ternary_tree/utils
 
-export TernaryTreeList, TernaryTreeKind
+export TernaryTreeList, TernaryTreeKind, TernaryTreeMap
 
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge
 export forceInplaceBalancing, sameShape, pairs, items, `[]`, identical
