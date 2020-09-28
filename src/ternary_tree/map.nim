@@ -586,11 +586,18 @@ iterator items*[K, T](tree: TernaryTreeMap[K, T]): K =
 proc `$`*[K,V](p: TernaryTreeMapKeyValuePair[K, V]): string =
   fmt"{p.k}:{p.v}"
 
+proc `identical`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
+  if cast[pointer](xs) == cast[pointer](ys):
+    return true
+
 proc `==`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
   if xs.len != ys.len:
     return false
 
   if xs.len == 0:
+    return true
+
+  if xs.identical(ys):
     return true
 
   let keys = xs.keys
@@ -654,5 +661,3 @@ proc sameShape*[K,T](xs: TernaryTreeMap[K,T], ys: TernaryTreeMap[K,T]): bool =
     return false
 
   return true
-
-# TODO, do comparing faster

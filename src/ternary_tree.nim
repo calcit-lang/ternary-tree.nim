@@ -9,7 +9,7 @@ import ternary_tree/utils
 export TernaryTreeList, TernaryTreeKind
 
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge
-export forceInplaceBalancing, sameShape, pairs, items, `[]`
+export forceInplaceBalancing, sameShape, pairs, items, `[]`, identical
 
 proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
   let size = xs.len
@@ -494,9 +494,16 @@ proc sameShape*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
 
   return true
 
+proc `identical`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
+  if cast[pointer](xs) == cast[pointer](ys):
+    return true
+
 proc `==`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
   if xs.len != ys.len:
     return false
+
+  if xs.identical(ys):
+    return true
 
   for idx in 0..<xs.len:
     if xs.get(idx) != ys.get(idx):
@@ -571,5 +578,3 @@ proc slice*[T](tree: TernaryTreeList[T], startIdx: int, endIdx: int): TernaryTre
     let leftCut = tree.left.slice(startIdx, leftSize)
     let rightCut = tree.right.slice(0, endIdx - leftSize - middleSize)
     return leftCut.concat(tree.middle).concat(rightCut)
-
-# TODO do comparing faster

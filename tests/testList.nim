@@ -101,6 +101,7 @@ test "check equality":
   check (data4 == data4n)
   check (data4 == data4Made)
   check (data4n == data4Made)
+  check data4.identical(data4Made) == false
 
 test "force balancing":
   var data = initTernaryTreeList[int](@[])

@@ -107,6 +107,10 @@ test "Equality":
   check (data.sameShape(b) == false)
   check (data.sameShape(c) == false)
 
+  let d = c.assoc("3", 13)
+  check (data == d)
+  check data.identical(d) == false
+
 test "Merge":
   var dict: Table[string, int]
   var dictBoth: Table[string, int]

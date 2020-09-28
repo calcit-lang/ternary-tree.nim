@@ -35,6 +35,7 @@ let data = initTernaryTreeList[int](@[1,2,3,4]
 
 data.len
 data.get(0)
+data[0]
 data.first()
 data.last()
 data.rest()
@@ -48,6 +49,9 @@ data.assocAfter(2, 10)
 data.prepend(10)
 data.append(10)
 data.concat(data)
+
+data == data
+data.identical(data) # compare by reference
 ```
 
 ```nim
@@ -60,10 +64,18 @@ let data = initTernaryTreeMap(dict)
 data.len
 data.contains("1")
 data.get("1")
+data["1"]
 data.toPairs()
 data.keys()
 
 data.assoc("1", 10)
 data.dissoc("1")
 data.merge(data)
+
+data == data
+data.identical(data) # compare by reference
 ```
+
+### License
+
+MIT
