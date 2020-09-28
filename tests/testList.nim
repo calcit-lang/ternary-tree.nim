@@ -139,3 +139,17 @@ test "check structure":
   let data11 = initTernaryTreeList[int](origin11)
 
   check data11.checkStructure
+
+test "slices":
+
+  var data = initTernaryTreeList[int](@[])
+  for idx in 0..<40:
+    data = data.append(idx, true)
+
+  var list40: seq[int] = @[]
+  for idx in 0..<40:
+    list40.add idx
+
+  for i in 0..<40:
+    for j in i..<40:
+      check data.slice(i, j).toSeq == list40[i..<j]

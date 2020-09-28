@@ -39,6 +39,7 @@ data.first()
 data.last()
 data.rest()
 data.butlast()
+data.slice()
 
 data.dissoc(0)
 data.assoc(0, 10)

@@ -525,6 +525,51 @@ proc checkStructure*[T](tree: TernaryTreeList[T]): bool =
 
   return true
 
-# TODO slice
+# excludes value at endIdx, kept aligned with JS & Clojure
+proc slice*[T](tree: TernaryTreeList[T], startIdx: int, endIdx: int): TernaryTreeList[T] =
+  # echo fmt"slice {tree.formatInline}: {startIdx}..{endIdx}"
+  if endIdx > tree.len:
+    raise newException(ValueError, fmt"Slice range too large {endIdx} for {tree}")
+  if startIdx < 0:
+    raise newException(ValueError, fmt"Slice range too small {startIdx} for {tree}")
+  if startIdx > endIdx:
+    raise newException(ValueError, fmt"Invalid slice range {startIdx}..{endIdx} for {tree}")
+  if startIdx == endIdx:
+    return TernaryTreeList[T](kind: ternaryTreeBranch, depth: 1, size: 0)
+
+  if tree.kind == ternaryTreeLeaf:
+    if startIdx == 0 and endIdx == 1:
+      return tree
+    else:
+      raise newException(ValueError, fmt"Invalid slice range for a leaf: {startIdx} {endIdx}")
+
+  let leftSize = tree.left.len
+  let middleSize = tree.middle.len
+  let rightSize = tree.right.len
+
+  # echo fmt"sizes: {leftSize} {middleSize} {rightSize}"
+
+  if startIdx >= leftSize + middleSize:
+    return tree.right.slice(startIdx - leftSize - middleSize, endIdx - leftSize - middleSize)
+  if startIdx >= leftSize:
+    if endIdx <= leftSize + middleSize:
+      return tree.middle.slice(startIdx - leftSize, endIdx - leftSize)
+    else:
+      let middleCut = tree.middle.slice(startIdx - leftSize, middleSize)
+      let rightCut = tree.right.slice(0, endIdx - leftSize - middleSize)
+      return middleCut.concat(rightCut)
+
+  if endIdx <= leftSize:
+    return tree.left.slice(startIdx, endIdx)
+
+  if endIdx <= leftSize + middleSize:
+    let leftCut = tree.left.slice(startIdx, leftSize)
+    let middleCut = tree.middle.slice(0, endIdx - leftSize)
+    return leftCut.concat(middleCut)
+
+  if endIdx <= leftSize + middleSize + rightSize:
+    let leftCut = tree.left.slice(startIdx, leftSize)
+    let rightCut = tree.right.slice(0, endIdx - leftSize - middleSize)
+    return leftCut.concat(tree.middle).concat(rightCut)
 
 # TODO do comparing faster
