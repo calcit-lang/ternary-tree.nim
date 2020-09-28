@@ -4,7 +4,7 @@ import unittest
 import ternary_tree
 
 test "init list":
-  check ($initTernaryTreeList[int](@[1,2,3,4]) == "TernaryTreeList[4, 2]")
+  check ($initTernaryTreeList[int](@[1,2,3,4]) == "TernaryTreeList[4, 3]")
 
   let origin11 = @[1,2,3,4,5,6,7,8,9,10,11]
   let data11 = initTernaryTreeList[int](origin11)
@@ -127,3 +127,15 @@ test "iterator":
     i = i + idx
 
   check (i == 6)
+
+test "check structure":
+  var data = initTernaryTreeList[int](@[])
+  for idx in 0..<20:
+    data = data.append(idx, true)
+
+  check data.checkStructure
+
+  let origin11 = @[1,2,3,4,5,6,7,8,9,10,11]
+  let data11 = initTernaryTreeList[int](origin11)
+
+  check data11.checkStructure
