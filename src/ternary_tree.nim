@@ -9,7 +9,7 @@ import ternary_tree/utils
 export TernaryTreeList, TernaryTreeKind
 
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge
-export forceInplaceBalancing, sameShape
+export forceInplaceBalancing, sameShape, pairs, items, `[]`
 
 proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
   let size = xs.len
@@ -80,15 +80,15 @@ proc toSeq*[T](tree: TernaryTreeList[T]): seq[T] =
     acc.add tree.value
     return acc
   of ternaryTreeBranch:
-    if tree.left != nil:
+    if not tree.left.isNil:
       let xs = tree.left.toSeq
       for x in xs:
         acc.add x
-    if tree.middle != nil:
+    if not tree.middle.isNil:
       let xs = tree.middle.toSeq
       for x in xs:
         acc.add x
-    if tree.right != nil:
+    if not tree.right.isNil:
       let xs = tree.right.toSeq
       for x in xs:
         acc.add x
@@ -97,11 +97,16 @@ proc toSeq*[T](tree: TernaryTreeList[T]): seq[T] =
 # recursive iterator not supported, use slow seq for now
 # https://forum.nim-lang.org/t/5697
 iterator items*[T](tree: TernaryTreeList[T]): T =
-  var acc: seq[T] = @[]
   let seqItems = tree.toSeq()
 
   for x in seqItems:
     yield x
+
+iterator pairs*[T](tree: TernaryTreeList[T]): tuple[k: int, v: T] =
+  let seqItems = tree.toSeq()
+
+  for idx, x in seqItems:
+    yield (idx, x)
 
 proc get*[T](tree: TernaryTreeList[T], idx: int): T =
   if idx < 0:
@@ -128,6 +133,9 @@ proc get*[T](tree: TernaryTreeList[T], idx: int): T =
     return tree.middle.get(idx - leftSize)
   else:
     return tree.right.get(idx - leftSize - middleSize)
+
+proc `[]`*[T](tree: TernaryTreeList[T], idx: int): T =
+  tree.get(idx)
 
 proc first*[T](tree: TernaryTreeList[T]): T =
   if tree.len > 0:
@@ -497,6 +505,6 @@ proc `==`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
   return true
 
 # TODO slice
+# TODO checkStructure
 
-# TODO, do comparing faster
-
+# TODO do comparing faster

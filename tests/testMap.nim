@@ -32,7 +32,8 @@ test "init map":
   check data10.contains("11") == false
 
   check data10.get("1") == some(11)
-  check data10.get("11") == none(int)
+  check data10["1"] == some(11)
+  check data10["11"] == none(int)
 
   check data10.checkStructure == true
 
@@ -94,8 +95,7 @@ test "Equality":
   check (data == data)
   check (data != b)
 
-  # TODO, handle failures in "3"
-  let c = data.assoc("4", 15)
+  let c = data.assoc("3", 15)
   check (data.sameShape(data))
   check (data.sameShape(b) == false)
   check (data.sameShape(c) == false)
@@ -119,3 +119,23 @@ test "Merge":
   let both = initTernaryTreeMap(dictBoth)
 
   check (merged == both)
+
+test "iterator":
+  var dict: Table[string, int]
+  var dictBoth: Table[string, int]
+  for idx in 0..<4:
+    dict[fmt"{idx}"] = idx + 10
+    dictBoth[fmt"{idx}"] = idx + 10
+
+  let data = initTernaryTreeMap(dict)
+
+  var i = 0
+  for k, v in data:
+    i = i + 1
+
+  check (i == 4)
+
+  i = 0
+  for key in data:
+    i = i + 1
+  check (i == 4)

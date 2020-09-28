@@ -111,7 +111,7 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
     TernaryTreeMap[K, T](
       kind: ternaryTreeBranch, size: size, depth: parentDepth,
       maxHash: right.getMax,
-      minHash: left.getMax,
+      minHash: left.getMin,
       left: left, middle: middle, right: right
     )
 
@@ -224,7 +224,11 @@ proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
 
   return none(T)
 
+proc `[]`*[K, T](tree: TernaryTreeMap[K, T], key: K): Option[T] =
+  tree.get(key)
+
 # leaves on the left has smaller hashes
+# TODO check sizes, depth, hashes
 proc checkStructure*(tree: TernaryTreeMap): bool =
   let xs = tree.toHashSortedSeq
   if xs.len <= 1:
@@ -525,6 +529,12 @@ proc toPairs*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePair[
     for item in tree.right.toPairs:
       result.add item
 
+iterator pairs*[K, T](tree: TernaryTreeMap[K, T]): TernaryTreeMapKeyValuePair[K, T] =
+  let seqItems = tree.toHashSortedSeq()
+
+  for x in seqItems:
+    yield (x.k, x.v)
+
 proc keys*[K, T](tree: TernaryTreeMap[K, T]): seq[K] =
   if tree.isNil:
     return @[]
@@ -537,6 +547,12 @@ proc keys*[K, T](tree: TernaryTreeMap[K, T]): seq[K] =
       result.add item
     for item in tree.right.keys:
       result.add item
+
+iterator items*[K, T](tree: TernaryTreeMap[K, T]): K =
+  let seqItems = tree.keys()
+
+  for x in seqItems:
+    yield x
 
 proc `$`*[K,V](p: TernaryTreeMapKeyValuePair[K, V]): string =
   fmt"{p.k}:{p.v}"
