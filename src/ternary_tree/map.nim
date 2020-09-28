@@ -18,7 +18,7 @@ proc getMax(tree: TernaryTreeMap): int =
     raise newException(ValueError, "Cannot find max hash of nil")
   case tree.kind
   of ternaryTreeLeaf:
-    tree.value
+    tree.hash
   of ternaryTreeBranch:
     tree.maxHash
 
@@ -27,9 +27,15 @@ proc getMin(tree: TernaryTreeMap): int =
     raise newException(ValueError, "Cannot find min hash of nil")
   case tree.kind
   of ternaryTreeLeaf:
-    tree.value
+    tree.hash
   of ternaryTreeBranch:
     tree.minHash
+
+proc getDepth*(tree: TernaryTreeMap): int =
+  if tree.isNil:
+    0
+  else:
+    tree.depth
 
 proc createLeaf[K, T](k: K, v: T): TernaryTreeMap[K, T] =
   TernaryTreeMap[K, T](
@@ -230,15 +236,44 @@ proc `[]`*[K, T](tree: TernaryTreeMap[K, T], key: K): Option[T] =
 # leaves on the left has smaller hashes
 # TODO check sizes, depth, hashes
 proc checkStructure*(tree: TernaryTreeMap): bool =
-  let xs = tree.toHashSortedSeq
-  if xs.len <= 1:
-    return true
-  var x0 = xs[0]
-  let xRest = xs[1..^1]
-  for item in xRest:
-    if x0.k.hash > item.k.hash:
-      return false
-    x0 = item
+
+  if tree.kind == ternaryTreeLeaf:
+    if tree.hash != tree.key.hash:
+      raise newException(ValueError, fmt"Bad hash at leaf node {tree}")
+
+    if tree.depth != 1:
+      raise newException(ValueError, fmt"Bad depth leaf node {tree}")
+
+    if tree.size != 1:
+      raise newException(ValueError, fmt"Bad size at leaf node {tree}")
+
+  else:
+    if not tree.left.isNil and not tree.middle.isNil:
+      if tree.left.getMax >= tree.middle.getMin:
+        raise newException(ValueError, fmt"Wrong hash order at left/middle branches {tree.formatInline(true)}")
+
+    if not tree.left.isNil and not tree.right.isNil:
+      if tree.left.getMax >= tree.right.getMin:
+        echo tree.left.getMax, " ", tree.right.getMin
+        raise newException(ValueError, fmt"Wrong hash order at left/right branches {tree.formatInline(true)}")
+
+    if not tree.middle.isNil and not tree.right.isNil:
+      if tree.middle.getMax >= tree.right.getMin:
+        raise newException(ValueError, fmt"Wrong hash order at middle/right branches {tree.formatInline(true)}")
+
+    if tree.depth != max(@[tree.left.getDepth, tree.middle.getDepth, tree.right.getDepth]) + 1:
+      raise newException(ValueError, fmt"Wrong depth at branch {tree}")
+
+    if tree.size != tree.left.len + tree.middle.len + tree.right.len:
+      raise newException(ValueError, fmt"Wrong size at branch {tree}")
+
+    if not tree.left.isNil:
+      discard tree.left.checkStructure
+    if not tree.middle.isNil:
+      discard tree.middle.checkStructure
+    if not tree.right.isNil:
+      discard tree.right.checkStructure
+
   return true
 
 proc rangeContainsHash*[K, T](tree: TernaryTreeMap[K, T], thisHash: Hash): bool =
@@ -426,12 +461,6 @@ proc assoc*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T, disableBalancing:
     if 3.roughIntPow(result.depth - 9) > result.size:
       result.forceInplaceBalancing
 
-proc getDepth*(tree: TernaryTreeMap): int =
-  if tree.isNil:
-    0
-  else:
-    tree.depth
-
 proc maxDepthOf3(left: TernaryTreeMap, middle: TernaryTreeMap, right: TernaryTreeMap): int =
   max(@[left.getDepth, middle.getDepth, right.getDepth])
 
@@ -557,11 +586,18 @@ iterator items*[K, T](tree: TernaryTreeMap[K, T]): K =
 proc `$`*[K,V](p: TernaryTreeMapKeyValuePair[K, V]): string =
   fmt"{p.k}:{p.v}"
 
+proc `identical`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
+  if cast[pointer](xs) == cast[pointer](ys):
+    return true
+
 proc `==`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
   if xs.len != ys.len:
     return false
 
   if xs.len == 0:
+    return true
+
+  if xs.identical(ys):
     return true
 
   let keys = xs.keys
@@ -625,5 +661,3 @@ proc sameShape*[K,T](xs: TernaryTreeMap[K,T], ys: TernaryTreeMap[K,T]): bool =
     return false
 
   return true
-
-# TODO, do comparing faster
