@@ -62,6 +62,12 @@ proc len*(tree: TernaryTreeList): int =
   else:
     tree.size
 
+proc isLeaf(tree: TernaryTreeList): bool =
+  tree.kind == ternaryTreeLeaf
+
+proc isBranch(tree: TernaryTreeList): bool =
+  tree.kind == ternaryTreeBranch
+
 proc formatInline*(tree: TernaryTreeList): string =
   if tree.isNil:
     return "_"
