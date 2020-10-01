@@ -13,6 +13,12 @@ type TernaryTreeMapKeyValuePair[K, V] = tuple
   k: K
   v: V
 
+proc isLeaf(tree: TernaryTreeMap): bool =
+  tree.kind == ternaryTreeLeaf
+
+proc isBranch(tree: TernaryTreeMap): bool =
+  tree.kind == ternaryTreeBranch
+
 proc getMax(tree: TernaryTreeMap): int =
   if tree.isNil:
     raise newException(ValueError, "Cannot find max hash of nil")
@@ -178,6 +184,9 @@ proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
   if tree.isNil:
     return false
 
+  if tree.isLeaf:
+    return tree.key == item
+
   let hx = item.hash
   # echo "looking for: ", hx, " ", item, " in ", tree.formatInline(true)
   if not tree.left.isNil:
@@ -205,8 +214,16 @@ proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
   return false
 
 proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
+
+  if tree.isLeaf:
+    if tree.key == item:
+      return some(tree.value)
+    else:
+      return none(T)
+
   let hx = item.hash
   # echo "looking for: ", hx, " ", item, " in ", tree.formatInline
+
   if not tree.left.isNil:
     if tree.left.kind == ternaryTreeLeaf:
       if tree.left.hash == hx:
