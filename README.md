@@ -28,7 +28,7 @@ TODO:
 Add in nimble file:
 
 ```nim
-requires "https://github.com/Cirru/ternary-tree#v0.1.6"
+requires "https://github.com/Cirru/ternary-tree#v0.1.8"
 ```
 
 ```nim
@@ -43,6 +43,7 @@ data.last()
 data.rest()
 data.butlast()
 data.slice()
+data.reverse()
 
 data.dissoc(0)
 data.assoc(0, 10)
