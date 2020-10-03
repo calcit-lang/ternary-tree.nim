@@ -1,5 +1,6 @@
 
 import unittest
+import algorithm
 
 import ternary_tree
 
@@ -142,7 +143,6 @@ test "check structure":
   check data11.checkStructure
 
 test "slices":
-
   var data = initTernaryTreeList[int](@[])
   for idx in 0..<40:
     data = data.append(idx, true)
@@ -154,3 +154,9 @@ test "slices":
   for i in 0..<40:
     for j in i..<40:
       check data.slice(i, j).toSeq == list40[i..<j]
+
+test "reverse":
+  let data = initTernaryTreeList(@[1,2,3,4,5,6,7,8,9,10])
+  let reversedData = data.reverse
+  check data.toSeq.reversed == reversedData.toSeq
+  check reversedData.checkStructure

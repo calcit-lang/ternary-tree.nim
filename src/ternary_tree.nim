@@ -584,3 +584,18 @@ proc slice*[T](tree: TernaryTreeList[T], startIdx: int, endIdx: int): TernaryTre
     let leftCut = tree.left.slice(startIdx, leftSize)
     let rightCut = tree.right.slice(0, endIdx - leftSize - middleSize)
     return leftCut.concat(tree.middle).concat(rightCut)
+
+proc reverse*[T](tree: TernaryTreeList[T]): TernaryTreeList[T] =
+  if tree.isNil:
+    return tree
+
+  case tree.kind
+  of ternaryTreeLeaf:
+    tree
+  of ternaryTreeBranch:
+    return TernaryTreeList[T](
+      kind: ternaryTreeBranch, depth: tree.depth, size: tree.size,
+      left: tree.right.reverse,
+      middle: tree.middle.reverse,
+      right: tree.left.reverse
+    )
