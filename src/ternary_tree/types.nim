@@ -43,3 +43,16 @@ type
     of ternaryTreeLeaf:
       hash*: int
       value*: T
+
+  TernaryTreeDraft*[T] = ref object
+    size*: int
+    case kind*: TernaryTreeKind
+    of ternaryTreeBranch:
+      left*: TernaryTreeDraft[T]
+      middle*: TernaryTreeDraft[T]
+      right*: TernaryTreeDraft[T]
+    of ternaryTreeLeaf:
+      value*: T
+
+  Branching* = enum
+    pickLeft, pickMiddle, pickRight
