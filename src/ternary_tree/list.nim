@@ -479,7 +479,7 @@ proc sameShape*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
 
   return true
 
-proc `identical`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
+proc identical*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
   if cast[pointer](xs) == cast[pointer](ys):
     return true
 
