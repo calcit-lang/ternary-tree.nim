@@ -1,7 +1,6 @@
 
 import tables
 import options
-import math
 import hashes
 import strformat
 import algorithm
@@ -98,26 +97,11 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
       right: createLeaf(rightPair),
     )
   else:
-    let extra = size mod 3
-    let groupSize = (size / 3).floor.int
-    var leftSize = groupSize
-    var middleSize = groupSize
-    var rightSize = groupSize
+    let divided = divideTernarySizes(size)
 
-    case extra
-    of 0:
-      discard
-    of 1:
-      middleSize = middleSize + 1
-    of 2:
-      leftSize = leftSize + 1
-      rightSize = rightSize + 1
-    else:
-      raise newException(ValueError, "Unexpected mod result")
-
-    let left = initTernaryTreeMap(xs[0..<leftSize])
-    let middle = initTernaryTreeMap(xs[leftSize..<(leftSize + middleSize)])
-    let right = initTernaryTreeMap(xs[(leftSize + middleSize)..^1])
+    let left = initTernaryTreeMap(xs[0..<divided.left])
+    let middle = initTernaryTreeMap(xs[divided.left..<(divided.left + divided.middle)])
+    let right = initTernaryTreeMap(xs[(divided.left + divided.middle)..^1])
 
     let parentDepth = max(@[left.depth, middle.depth, right.depth]) + 1
     TernaryTreeMap[K, T](
