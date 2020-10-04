@@ -83,10 +83,10 @@ data == data
 data.identical(data) # compare by reference
 ```
 
-* Draft
+* Revision
 
 ```nim
-let data = initTernaryTreeDraft[int](@[1,2,3,4,5,6,7,8,9])
+let data = initTernaryTreeRevision[int](@[1,2,3,4,5,6,7,8,9])
 
 data.len
 data.toSeq

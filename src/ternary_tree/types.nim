@@ -44,12 +44,12 @@ type
       hash*: int
       value*: T
 
-  TernaryTreeDraft*[T] = ref object
+  TernaryTreeRevision*[T] = ref object
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
-      left*: TernaryTreeDraft[T]
-      middle*: TernaryTreeDraft[T]
-      right*: TernaryTreeDraft[T]
+      left*: TernaryTreeRevision[T]
+      middle*: TernaryTreeRevision[T]
+      right*: TernaryTreeRevision[T]
     of ternaryTreeLeaf:
       value*: T
 

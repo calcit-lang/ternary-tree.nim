@@ -6,9 +6,9 @@ import strformat
 import ternary_tree
 
 test "init list":
-  # check ($initTernaryTreeDraft[int](@[1,2,3,4]) == "TernaryTreeList[4, 3]")
+  # check ($initTernaryTreeRevision[int](@[1,2,3,4]) == "TernaryTreeList[4, 3]")
 
-  let data = initTernaryTreeDraft[int](@[1,2,3,4,5,6,7,8,9])
+  let data = initTernaryTreeRevision[int](@[1,2,3,4,5,6,7,8,9])
   # echo data.formatInline
 
   check data.get(@[pickLeft]) == some(2)

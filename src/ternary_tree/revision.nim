@@ -7,34 +7,34 @@ import strformat
 import ./types
 import ./utils
 
-proc initTernaryTreeDraft*[T](xs: seq[T]): TernaryTreeDraft[T] =
+proc initTernaryTreeRevision*[T](xs: seq[T]): TernaryTreeRevision[T] =
   let size = xs.len
 
   case size
   of 0:
-    TernaryTreeDraft[T](kind: ternaryTreeBranch)
+    TernaryTreeRevision[T](kind: ternaryTreeBranch)
   of 1:
-    TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: xs[0])
+    TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: xs[0])
   of 2:
-    let left = TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: xs[0])
-    let right = TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: xs[1])
-    TernaryTreeDraft[T](kind: ternaryTreeBranch, left: left, right: right)
+    let left = TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: xs[0])
+    let right = TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: xs[1])
+    TernaryTreeRevision[T](kind: ternaryTreeBranch, left: left, right: right)
   of 3:
-    let left = TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: xs[0])
-    let middle = TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: xs[1])
-    let right = TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: xs[2])
-    TernaryTreeDraft[T](kind: ternaryTreeBranch, left: left, middle: middle, right: right)
+    let left = TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: xs[0])
+    let middle = TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: xs[1])
+    let right = TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: xs[2])
+    TernaryTreeRevision[T](kind: ternaryTreeBranch, left: left, middle: middle, right: right)
   else:
     let divided = divideTernarySizes(size)
 
-    let left = initTernaryTreeDraft(xs[0..<divided.left])
-    let middle = initTernaryTreeDraft(xs[divided.left..<(divided.left + divided.middle)])
-    let right = initTernaryTreeDraft(xs[(divided.left + divided.middle)..^1])
-    TernaryTreeDraft[T](kind: ternaryTreeBranch, left: left, middle: middle, right: right)
+    let left = initTernaryTreeRevision(xs[0..<divided.left])
+    let middle = initTernaryTreeRevision(xs[divided.left..<(divided.left + divided.middle)])
+    let right = initTernaryTreeRevision(xs[(divided.left + divided.middle)..^1])
+    TernaryTreeRevision[T](kind: ternaryTreeBranch, left: left, middle: middle, right: right)
 
 # TODO might need more information
-proc `$`*[T](tree: TernaryTreeDraft[T]): string =
-  "TernaryTreeDraft[...]"
+proc `$`*[T](tree: TernaryTreeRevision[T]): string =
+  "TernaryTreeRevision[...]"
 
 const shortChartMap = "$abcdefghijklmnopqrstuvwxyz"
 
@@ -87,10 +87,10 @@ proc seqToStringPath*(xs: seq[PickBranch]): string =
   if unit == 1:
     result = result & shortChartMap[acc + 1]
 
-proc get*[T](tree: TernaryTreeDraft[T], path: string): Option[T] =
+proc get*[T](tree: TernaryTreeRevision[T], path: string): Option[T] =
   tree.get(path.stringToSeqPath)
 
-proc get*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch]): Option[T] =
+proc get*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch]): Option[T] =
   if tree.isNil:
     return none(T)
 
@@ -114,14 +114,14 @@ proc get*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch]): Option[T] =
     of pickRight:
       return tree.right.get(path[1..^1])
 
-proc `[]`*[T](tree: TernaryTreeDraft[T], path: string): Option[T] =
+proc `[]`*[T](tree: TernaryTreeRevision[T], path: string): Option[T] =
   tree.get(path)
 
-proc contains*[T](tree: TernaryTreeDraft[T], path: string): bool =
+proc contains*[T](tree: TernaryTreeRevision[T], path: string): bool =
   let item = tree.get(path)
   return item.isSome
 
-proc len*[T](tree: TernaryTreeDraft[T]): int =
+proc len*[T](tree: TernaryTreeRevision[T]): int =
   if tree.isNil:
     return 0
 
@@ -131,7 +131,7 @@ proc len*[T](tree: TernaryTreeDraft[T]): int =
   of ternaryTreeBranch:
     return tree.left.len + tree.middle.len + tree.right.len
 
-proc identical*[T](xs: TernaryTreeDraft[T], ys: TernaryTreeDraft[T]): bool =
+proc identical*[T](xs: TernaryTreeRevision[T], ys: TernaryTreeRevision[T]): bool =
   cast[pointer](xs) == cast[pointer](ys)
 
 proc `==`*(xs, ys: seq[PickBranch]): bool =
@@ -149,7 +149,7 @@ proc `==`*(xs, ys: seq[PickBranch]): bool =
     return false
   return xs[1..^1] == ys[1..^1]
 
-proc isEmpty*[T](tree: TernaryTreeDraft[T]): bool =
+proc isEmpty*[T](tree: TernaryTreeRevision[T]): bool =
   if tree.isNil:
     return true
 
@@ -165,25 +165,25 @@ proc isEmpty*[T](tree: TernaryTreeDraft[T]): bool =
       return false
     return true
 
-proc assoc*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch], item: T): TernaryTreeDraft[T] =
+proc assoc*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch], item: T): TernaryTreeRevision[T] =
   if tree.isNil:
     if path.len == 0:
-      return TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: item)
+      return TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: item)
 
     raise newException(ValueError, fmt"no target for assoc at {path}")
 
   case tree.kind
   of ternaryTreeLeaf:
     if path.len == 0:
-      return TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: item)
+      return TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: item)
     raise newException(ValueError, fmt"no target for assoc at {path}")
 
   of ternaryTreeBranch:
     if path.len == 0:
       if tree.isEmpty:
-        return TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: item)
+        return TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: item)
       else:
-        return TernaryTreeDraft[T](
+        return TernaryTreeRevision[T](
           kind: ternaryTreeBranch,
           left: tree.left,
           middle: tree.middle.assoc(path[1..^1], item),
@@ -193,31 +193,31 @@ proc assoc*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch], item: T): Terna
     let pick = path[0]
     case pick
     of pickLeft:
-      TernaryTreeDraft[T](
+      TernaryTreeRevision[T](
         kind: ternaryTreeBranch,
         left: tree.left.assoc(path[1..^1], item),
         middle: tree.middle,
         right: tree.right
       )
     of pickMiddle:
-      TernaryTreeDraft[T](
+      TernaryTreeRevision[T](
         kind: ternaryTreeBranch,
         left: tree.left,
         middle: tree.middle.assoc(path[1..^1], item),
         right: tree.right
       )
     of pickRight:
-      TernaryTreeDraft[T](
+      TernaryTreeRevision[T](
         kind: ternaryTreeBranch,
         left: tree.left,
         middle: tree.middle,
         right: tree.right.assoc(path[1..^1], item)
       )
 
-proc assoc*[T](tree: TernaryTreeDraft[T], path: string, item: T): TernaryTreeDraft[T] =
+proc assoc*[T](tree: TernaryTreeRevision[T], path: string, item: T): TernaryTreeRevision[T] =
   tree.assoc(path.stringToSeqPath, item)
 
-proc toSeq*[T](tree: TernaryTreeDraft[T]): seq[T] =
+proc toSeq*[T](tree: TernaryTreeRevision[T]): seq[T] =
   if tree.isNil:
     return @[]
   case tree.kind
@@ -231,14 +231,14 @@ proc toSeq*[T](tree: TernaryTreeDraft[T]): seq[T] =
     for x in tree.right.toSeq:
       result.add x
 
-proc `==`*[T](xs, ys: TernaryTreeDraft[T]): bool =
+proc `==`*[T](xs, ys: TernaryTreeRevision[T]): bool =
   xs.toSeq == ys.toSeq
 
 # this function mutates original tree to make it more balanced
-proc forceInplaceBalancing*[T](tree: TernaryTreeDraft[T]): void =
-  # echo "Force inplace balancing of draft"
+proc forceInplaceBalancing*[T](tree: TernaryTreeRevision[T]): void =
+  # echo "Force inplace balancing of revision"
   let xs = tree.toSeq
-  let newTree = initTernaryTreeDraft(xs)
+  let newTree = initTernaryTreeRevision(xs)
   tree.left = newTree.left
   tree.middle = newTree.middle
   tree.right = newTree.right
@@ -251,7 +251,7 @@ proc stripeTrailingMiddle(xs: seq[PickBranch]): seq[PickBranch] =
   else:
     return xs
 
-proc keys*[T](tree: TernaryTreeDraft[T], basePath: seq[PickBranch] = @[]): seq[string] =
+proc keys*[T](tree: TernaryTreeRevision[T], basePath: seq[PickBranch] = @[]): seq[string] =
   if tree.isNil:
     return @[]
 
@@ -266,7 +266,7 @@ proc keys*[T](tree: TernaryTreeDraft[T], basePath: seq[PickBranch] = @[]): seq[s
     for item in tree.right.keys(basePath.concat(@[pickRight])):
       result.add item
 
-iterator pairs*[T](tree: TernaryTreeDraft[T]): tuple[k: string, v: T] =
+iterator pairs*[T](tree: TernaryTreeRevision[T]): tuple[k: string, v: T] =
   if tree.isEmpty:
     discard
   else:
@@ -275,7 +275,7 @@ iterator pairs*[T](tree: TernaryTreeDraft[T]): tuple[k: string, v: T] =
       let v = tree.get(k).get
       yield (k, v)
 
-proc formatInline*(tree: TernaryTreeDraft, basePath: seq[PickBranch] = @[]): string =
+proc formatInline*(tree: TernaryTreeRevision, basePath: seq[PickBranch] = @[]): string =
   if tree.isNil:
     return "_"
   case tree.kind
@@ -286,7 +286,7 @@ proc formatInline*(tree: TernaryTreeDraft, basePath: seq[PickBranch] = @[]): str
     " " & tree.middle.formatInline(basePath.concat(@[pickMiddle])) &
     " " & tree.right.formatInline(basePath.concat(@[pickRight])) & ")"
 
-proc dissoc*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch]): TernaryTreeDraft[T] =
+proc dissoc*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch]): TernaryTreeRevision[T] =
   if tree.isNil:
     if path.len == 0:
       return nil
@@ -305,31 +305,31 @@ proc dissoc*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch]): TernaryTreeDr
     let restPath = path[1..^1]
     case pick
     of pickLeft:
-      return TernaryTreeDraft[T](
+      return TernaryTreeRevision[T](
         kind: ternaryTreeBranch,
         left: tree.left.dissoc(restPath),
         middle: tree.middle,
         right: tree.right
       )
     of pickMiddle:
-      return TernaryTreeDraft[T](
+      return TernaryTreeRevision[T](
         kind: ternaryTreeBranch,
         left: tree.left,
         middle: tree.middle.dissoc(restPath),
         right: tree.right
       )
     of pickRight:
-      return TernaryTreeDraft[T](
+      return TernaryTreeRevision[T](
         kind: ternaryTreeBranch,
         left: tree.left,
         middle: tree.middle,
         right: tree.right.dissoc(restPath)
       )
 
-proc dissoc*[T](tree: TernaryTreeDraft[T], path: string): TernaryTreeDraft[T] =
+proc dissoc*[T](tree: TernaryTreeRevision[T], path: string): TernaryTreeRevision[T] =
   tree.dissoc(path.stringToSeqPath)
 
-proc assocAside*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch], item: T, aside: PickBranch): TernaryTreeDraft[T] =
+proc assocAside*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch], item: T, aside: PickBranch): TernaryTreeRevision[T] =
   if tree.isNil:
     raise newException(ValueError, fmt"target nil is bad for assoc aside at {path}")
 
@@ -338,18 +338,18 @@ proc assocAside*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch], item: T, a
     if path.len == 0:
       case aside
       of pickLeft:
-        return TernaryTreeDraft[T](
+        return TernaryTreeRevision[T](
           kind: ternaryTreeBranch,
-          left: TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: item),
+          left: TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: item),
           middle: tree,
           right: nil
         )
       of pickRight:
-        return TernaryTreeDraft[T](
+        return TernaryTreeRevision[T](
           kind: ternaryTreeBranch,
           left: nil,
           middle: tree,
-          right: TernaryTreeDraft[T](kind: ternaryTreeLeaf, value: item)
+          right: TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: item)
         )
       else:
         raise newException(ValueError, fmt"invalid aside pickMiddle")
@@ -361,7 +361,7 @@ proc assocAside*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch], item: T, a
       if tree.isEmpty:
         raise newException(ValueError, fmt"no target for assoc at {path}")
       else:
-        return TernaryTreeDraft[T](
+        return TernaryTreeRevision[T](
           kind: ternaryTreeBranch,
           left: tree.left,
           middle: tree.middle.assocAside(path[1..^1], item, aside),
@@ -371,34 +371,34 @@ proc assocAside*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch], item: T, a
     let pick = path[0]
     case pick
     of pickLeft:
-      TernaryTreeDraft[T](
+      TernaryTreeRevision[T](
         kind: ternaryTreeBranch,
         left: tree.left.assocAside(path[1..^1], item, aside),
         middle: tree.middle,
         right: tree.right
       )
     of pickMiddle:
-      TernaryTreeDraft[T](
+      TernaryTreeRevision[T](
         kind: ternaryTreeBranch,
         left: tree.left,
         middle: tree.middle.assocAside(path[1..^1], item, aside),
         right: tree.right
       )
     of pickRight:
-      TernaryTreeDraft[T](
+      TernaryTreeRevision[T](
         kind: ternaryTreeBranch,
         left: tree.left,
         middle: tree.middle,
         right: tree.right.assocAside(path[1..^1], item, aside)
       )
 
-proc assocBefore*[T](tree: TernaryTreeDraft[T], path: string, item: T): TernaryTreeDraft[T] =
+proc assocBefore*[T](tree: TernaryTreeRevision[T], path: string, item: T): TernaryTreeRevision[T] =
   tree.assocAside(path.stringToSeqPath, item, pickLeft)
 
-proc assocAfter*[T](tree: TernaryTreeDraft[T], path: string, item: T): TernaryTreeDraft[T] =
+proc assocAfter*[T](tree: TernaryTreeRevision[T], path: string, item: T): TernaryTreeRevision[T] =
   tree.assocAside(path.stringToSeqPath, item, pickRight)
 
-proc sameShape*[T](xs: TernaryTreeDraft[T], ys: TernaryTreeDraft[T]): bool =
+proc sameShape*[T](xs: TernaryTreeRevision[T], ys: TernaryTreeRevision[T]): bool =
   if xs.isNil:
     if ys.isNil:
       return true
