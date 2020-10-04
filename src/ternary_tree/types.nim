@@ -45,7 +45,6 @@ type
       value*: T
 
   TernaryTreeDraft*[T] = ref object
-    size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
       left*: TernaryTreeDraft[T]
@@ -54,5 +53,5 @@ type
     of ternaryTreeLeaf:
       value*: T
 
-  Branching* = enum
+  PickBranch* = enum
     pickLeft, pickMiddle, pickRight

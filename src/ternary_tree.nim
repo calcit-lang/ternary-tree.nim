@@ -4,7 +4,7 @@ import ternary_tree/map
 import ternary_tree/list
 import ternary_tree/draft
 
-export TernaryTreeList, TernaryTreeKind, TernaryTreeMap, Branching
+export TernaryTreeList, TernaryTreeKind, TernaryTreeMap, PickBranch
 
 export get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge, forceInplaceBalancing, sameShape, pairs, items, `[]`, identical
 

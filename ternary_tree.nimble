@@ -14,5 +14,5 @@ requires "nim >= 1.2.6"
 
 task t, "Runs the test suite":
   exec "nim c --hints:off -r tests/test_draft"
-  exec "nim c --hints:off -r tests/test_list"
-  exec "nim c --hints:off -r tests/test_map"
+  # exec "nim c --hints:off -r tests/test_list"
+  # exec "nim c --hints:off -r tests/test_map"

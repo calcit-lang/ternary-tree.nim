@@ -588,8 +588,7 @@ proc `$`*[K,V](p: TernaryTreeMapKeyValuePair[K, V]): string =
   fmt"{p.k}:{p.v}"
 
 proc identical*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
-  if cast[pointer](xs) == cast[pointer](ys):
-    return true
+  cast[pointer](xs) == cast[pointer](ys)
 
 proc `==`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
   if xs.len != ys.len:
