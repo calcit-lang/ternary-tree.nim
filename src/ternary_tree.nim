@@ -12,4 +12,4 @@ export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains
 
 export initTernaryTreeList, toSeq, first, last, rest, butlast, insert, assocBefore, assocAfter, prepend, append, concat, slice, reverse
 
-export initTernaryTreeDraft
+export initTernaryTreeDraft, stringToSeqPath, seqToStringPath
