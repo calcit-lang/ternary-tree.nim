@@ -31,6 +31,8 @@ Add in nimble file:
 requires "https://github.com/Cirru/ternary-tree#v0.1.8"
 ```
 
+* List
+
 ```nim
 import ternary_tree
 let data = initTernaryTreeList[int](@[1,2,3,4]
@@ -57,6 +59,8 @@ data == data
 data.identical(data) # compare by reference
 ```
 
+* Map
+
 ```nim
 var dict: Table[string, int]
 for idx in 0..<10:
@@ -77,6 +81,27 @@ data.merge(data)
 
 data == data
 data.identical(data) # compare by reference
+```
+
+* Draft
+
+```nim
+let data = initTernaryTreeDraft[int](@[1,2,3,4,5,6,7,8,9])
+
+data.len
+data.toSeq
+data.keys
+data.get("j")
+data.contains("j")
+
+for k, v in data:
+  echo k, v
+
+data.dissoc "j"
+data.assoc "j", 11
+data.assocBefore "j", 11
+data.assocAfter "j", 11
+data.formatInline
 ```
 
 ### License

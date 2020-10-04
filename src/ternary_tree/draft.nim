@@ -39,6 +39,8 @@ proc `$`*[T](tree: TernaryTreeDraft[T]): string =
 const shortChartMap = "$abcdefghijklmnopqrstuvwxyz"
 
 proc stringToSeqPath*(text: string): seq[PickBranch] =
+  if text == "":
+    return @[]
   for x in text:
     let idx = shortChartMap.find(x)
     if idx < 0 or idx >= 27:
@@ -115,7 +117,7 @@ proc get*[T](tree: TernaryTreeDraft[T], path: seq[PickBranch]): Option[T] =
 proc `[]`*[T](tree: TernaryTreeDraft[T], path: string): Option[T] =
   tree.get(path)
 
-proc contains*[T](tree: TernaryTreeDraft[T], path: string): Option[T] =
+proc contains*[T](tree: TernaryTreeDraft[T], path: string): bool =
   let item = tree.get(path)
   return item.isSome
 
