@@ -7,7 +7,7 @@ Ternary Tree
 If you know Clojure, then you know what I want to build.
 However ternary tree may have issues in performance and memory size(see the holes below). So this project is experimental.
 
-Compact tree representatin of `[1 2 3 4 5 6 7 8 9 0 11]`(`_` for empty holes in the tree):
+Compact tree representatin of `[1 2 3 4 5 6 7 8 9 0 11]`, where `_` is for empty holes in the tree:
 
 ```cirru
 ((1 (2 _ 3) 4) (5 6 7) (8 (9 _ 10) 11))
@@ -19,17 +19,15 @@ Compact tree representatin of map:
 ((2:12 3:13 7:17) ((_ 9:19 _) (6:16 _ 5:15) (_ 1:2222 _)) (8:18 0:10 4:14))
 ```
 
-TODO:
-
-- sets
-
 ### Usages
 
 Add in nimble file:
 
 ```nim
-requires "https://github.com/Cirru/ternary-tree#v0.1.8"
+requires "https://github.com/Cirru/ternary-tree#v0.1.9"
 ```
+
+* List
 
 ```nim
 import ternary_tree
@@ -57,6 +55,8 @@ data == data
 data.identical(data) # compare by reference
 ```
 
+* Map
+
 ```nim
 var dict: Table[string, int]
 for idx in 0..<10:
@@ -78,6 +78,33 @@ data.merge(data)
 data == data
 data.identical(data) # compare by reference
 ```
+
+* Revision
+
+Idea came from CRDT and [bisection-key](https://github.com/Cirru/bisection-key). Each element has its unique key(based on structure of current tree representation). When a new element is inserted based on an existing key, it will be in the right when `toSeq` is called.
+
+```nim
+let data = initTernaryTreeRevision[int](@[1,2,3,4,5,6,7,8,9])
+
+data.len
+data.toSeq
+data.keys
+data.get("j")
+data.contains("j")
+
+for k, v in data:
+  echo k, v
+
+data.dissoc "j"
+data.assoc "j", 11
+data.assocBefore "j", 11
+data.assocAfter "j", 11
+data.formatInline
+```
+
+- Sets
+
+_TODO_
 
 ### License
 

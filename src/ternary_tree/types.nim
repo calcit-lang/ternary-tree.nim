@@ -5,7 +5,6 @@ type
     ternaryTreeLeaf
 
   TernaryTreeList*[T] = ref object
-    depth*: int
     size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
@@ -16,8 +15,6 @@ type
       value*: T
 
   TernaryTreeMap*[K, T] = ref object
-    depth*: int
-    size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
       maxHash*: int
@@ -31,7 +28,6 @@ type
       value*: T
 
   TernaryTreeSet*[T] = ref object
-    depth*: int
     size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
@@ -44,15 +40,14 @@ type
       hash*: int
       value*: T
 
-  TernaryTreeDraft*[T] = ref object
-    size*: int
+  TernaryTreeRevision*[T] = ref object
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
-      left*: TernaryTreeDraft[T]
-      middle*: TernaryTreeDraft[T]
-      right*: TernaryTreeDraft[T]
+      left*: TernaryTreeRevision[T]
+      middle*: TernaryTreeRevision[T]
+      right*: TernaryTreeRevision[T]
     of ternaryTreeLeaf:
       value*: T
 
-  Branching* = enum
+  PickBranch* = enum
     pickLeft, pickMiddle, pickRight

@@ -10,30 +10,29 @@ proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
 
   case size
     of 0:
-      TernaryTreeList[T](kind: ternaryTreeBranch, size: 0, depth: 1)
+      TernaryTreeList[T](kind: ternaryTreeBranch, size: 0)
     of 1:
-      TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: xs[0])
+      TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[0])
     of 2:
-      let left = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: xs[0])
-      let right = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: xs[1])
-      TernaryTreeList[T](kind: ternaryTreeBranch, size: 2, depth: 2, left: left, right: right)
+      let left = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[0])
+      let right = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[1])
+      TernaryTreeList[T](kind: ternaryTreeBranch, size: 2, left: left, right: right)
     of 3:
-      let left = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: xs[0])
-      let middle = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: xs[1])
-      let right = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: xs[2])
-      TernaryTreeList[T](kind: ternaryTreeBranch, size: 3, depth: 2, left: left, middle: middle, right: right)
+      let left = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[0])
+      let middle = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[1])
+      let right = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[2])
+      TernaryTreeList[T](kind: ternaryTreeBranch, size: 3, left: left, middle: middle, right: right)
     else:
       let divided = divideTernarySizes(size)
 
       let left = initTernaryTreeList(xs[0..<divided.left])
       let middle = initTernaryTreeList(xs[divided.left..<(divided.left + divided.middle)])
       let right = initTernaryTreeList(xs[(divided.left + divided.middle)..^1])
-      let parentDepth = max(@[left.depth, middle.depth, right.depth]) + 1
-      TernaryTreeList[T](kind: ternaryTreeBranch, size: size, depth: parentDepth, left: left, middle: middle, right: right)
+      TernaryTreeList[T](kind: ternaryTreeBranch, size: size, left: left, middle: middle, right: right)
 
 
 proc `$`*(tree: TernaryTreeList): string =
-  fmt"TernaryTreeList[{tree.size}, {tree.depth}]"
+  fmt"TernaryTreeList[{tree.size}, ...]"
 
 proc len*(tree: TernaryTreeList): int =
   if tree.isNil:
@@ -142,7 +141,7 @@ proc assoc*[T](tree: TernaryTreeList[T], idx: int, item: T): TernaryTreeList[T] 
 
   if tree.kind == ternaryTreeLeaf:
     if idx == 0:
-      return TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: item)
+      return TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
     else:
       raise newException(ValueError, fmt"Cannot get from leaf with index {idx}")
 
@@ -155,34 +154,34 @@ proc assoc*[T](tree: TernaryTreeList[T], idx: int, item: T): TernaryTreeList[T] 
 
   if idx <= leftSize - 1:
     return TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: tree.size, depth: tree.depth,
+      kind: ternaryTreeBranch, size: tree.size,
       left: tree.left.assoc(idx, item),
       middle: tree.middle,
       right: tree.right
     )
   elif idx <= leftSize + middleSize - 1:
     return TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: tree.size, depth: tree.depth,
+      kind: ternaryTreeBranch, size: tree.size,
       left: tree.left,
       middle: tree.middle.assoc(idx - leftSize, item),
       right: tree.right
     )
   else:
     return TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: tree.size, depth: tree.depth,
+      kind: ternaryTreeBranch, size: tree.size,
       left: tree.left,
       middle: tree.middle,
       right: tree.right.assoc(idx - leftSize - middleSize, item)
     )
 
-proc getDepth*[T](tree: TernaryTreeList[T]): int =
+proc depth*[T](tree: TernaryTreeList[T]): int =
   if tree.isNil:
-    0
-  else:
-    tree.depth
-
-proc maxDepthOf3[T](left: TernaryTreeList[T], middle: TernaryTreeList[T], right: TernaryTreeList[T]): int =
-  max(@[left.getDepth, middle.getDepth, right.getDepth])
+    return 0
+  case tree.kind
+  of ternaryTreeLeaf:
+    return 1
+  of ternaryTreeBranch:
+    max(@[tree.left.depth, tree.middle.depth, tree.right.depth]) + 1
 
 proc dissoc*[T](tree: TernaryTreeList[T], idx: int): TernaryTreeList[T] =
   if tree.isNil:
@@ -199,7 +198,7 @@ proc dissoc*[T](tree: TernaryTreeList[T], idx: int): TernaryTreeList[T] =
 
   if tree.len == 1:
     return TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: 0, depth: 1,
+      kind: ternaryTreeBranch, size: 0,
       left: nil,
       middle: nil,
       right: nil
@@ -217,40 +216,37 @@ proc dissoc*[T](tree: TernaryTreeList[T], idx: int): TernaryTreeList[T] =
 
   if idx <= leftSize - 1:
     var changedChild = tree.left.dissoc(idx)
-    let newDepth = maxDepthOf3(changedChild, tree.middle, tree.right) + 1
     if changedChild.size == 0:
       changedChild = nil
     result = TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: tree.size - 1, depth: newDepth,
+      kind: ternaryTreeBranch, size: tree.size - 1,
       left: changedChild,
       middle: tree.middle,
       right: tree.right
     )
   elif idx <= leftSize + middleSize - 1:
     var changedChild = tree.middle.dissoc(idx - leftSize)
-    let newDepth = maxDepthOf3(tree.left, changedChild, tree.right) + 1
     if changedChild.size == 0:
       changedChild = nil
     result = TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: tree.size - 1, depth: newDepth,
+      kind: ternaryTreeBranch, size: tree.size - 1,
       left: tree.left,
       middle: changedChild,
       right: tree.right
     )
   else:
     var changedChild = tree.right.dissoc(idx - leftSize - middleSize)
-    let newDepth = maxDepthOf3(tree.left, tree.middle, changedChild) + 1
     if changedChild.size == 0:
       changedChild = nil
     result = TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: tree.size - 1, depth: newDepth,
+      kind: ternaryTreeBranch, size: tree.size - 1,
       left: tree.left,
       middle: tree.middle,
       right: changedChild
     )
 
   if result.len == 1:
-    result = TernaryTreeList[T](kind: ternaryTreeLeaf, depth: 1, size: 1, value: result.get(0))
+    result = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: result.get(0))
 
   return result
 
@@ -281,13 +277,12 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
     var right: TernaryTreeList[T] = nil
 
     if after:
-      right = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: item)
+      right = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
     else:
-      left = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: item)
+      left = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
 
     return TernaryTreeList[T](
       kind: ternaryTreeBranch,
-      depth: 2,
       size: 2,
       left: left,
       middle: tree,
@@ -299,37 +294,33 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
       if tree.left != nil:
         return TernaryTreeList[T](
           kind: ternaryTreeBranch,
-          depth: tree.depth,
           size: 2,
           left: tree.left,
-          middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: item),
+          middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
           right: nil
         )
       elif tree.middle != nil:
         return TernaryTreeList[T](
           kind: ternaryTreeBranch,
-          depth: tree.depth,
           size: 2,
           left: nil,
           middle: tree.middle,
-          right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: item)
+          right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
         )
     else:
       if tree.right != nil:
         return TernaryTreeList[T](
           kind: ternaryTreeBranch,
-          depth: tree.depth,
           size: 2,
           left: nil,
-          middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: item),
+          middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
           right: tree.right
         )
       elif tree.middle != nil:
         return TernaryTreeList[T](
           kind: ternaryTreeBranch,
-          depth: tree.depth,
           size: 2,
-          left: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: item),
+          left: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
           middle: tree.middle,
           right: nil
         )
@@ -339,20 +330,18 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
       if tree.right.isNil:
         return TernaryTreeList[T](
           kind: ternaryTreeBranch,
-          depth: tree.depth,
           size: 3,
           left: tree.left,
           middle: tree.middle,
-          right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: item)
+          right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
         )
 
     else:
       if tree.left.isNil:
         return TernaryTreeList[T](
           kind: ternaryTreeBranch,
-          depth: tree.depth,
           size: 3,
-          left: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, depth: 1, value: item),
+          left: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
           middle: tree.middle,
           right: tree.right
         )
@@ -369,30 +358,27 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
 
   if idx <= leftSize - 1:
     let changedChild = tree.left.insert(idx, item, after)
-    let newDepth = maxDepthOf3(changedChild, tree.middle, tree.right) + 1
 
     return TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: tree.size + 1, depth: newDepth,
+      kind: ternaryTreeBranch, size: tree.size + 1,
       left: changedChild,
       middle: tree.middle,
       right: tree.right
     )
   elif idx <= leftSize + middleSize - 1:
     let changedChild = tree.middle.insert(idx - leftSize, item, after)
-    let newDepth = maxDepthOf3(tree.left, changedChild, tree.right) + 1
 
     return TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: tree.size + 1, depth: newDepth,
+      kind: ternaryTreeBranch, size: tree.size + 1,
       left: tree.left,
       middle: changedChild,
       right: tree.right
     )
   else:
     let changedChild = tree.right.insert(idx - leftSize - middleSize, item, after)
-    let newDepth = maxDepthOf3(tree.left, tree.middle, changedChild) + 1
 
     return TernaryTreeList[T](
-      kind: ternaryTreeBranch, size: tree.size + 1, depth: newDepth,
+      kind: ternaryTreeBranch, size: tree.size + 1,
       left: tree.left,
       middle: tree.middle,
       right: changedChild
@@ -415,7 +401,7 @@ proc forceInplaceBalancing*[T](tree: TernaryTreeList[T]): void =
 
 proc prepend*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = false): TernaryTreeList[T] =
   if tree.isNil or tree.len == 0:
-    return TernaryTreeList[T](kind: ternaryTreeLeaf, depth: 1, size: 1, value: item)
+    return TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
   result = insert(tree, 0, item, false)
 
   if (not disableBalancing) and result.depth > 27:
@@ -424,7 +410,7 @@ proc prepend*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = fal
 
 proc append*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = false): TernaryTreeList[T] =
   if tree.isNil or tree.len == 0:
-    return TernaryTreeList[T](kind: ternaryTreeLeaf, depth: 1, size: 1, value: item)
+    return TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
   result = insert(tree, tree.len - 1, item, true)
 
   if (not disableBalancing) and result.depth > 27:
@@ -436,9 +422,8 @@ proc concat*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): TernaryTreeList
     return ys
   if ys.isNil or ys.len == 0:
     return xs
-  let newDepth = max(xs.getDepth, ys.getDepth) + 1
   return TernaryTreeList[T](
-    kind: ternaryTreeBranch, size: xs.size + ys.size, depth: newDepth,
+    kind: ternaryTreeBranch, size: xs.size + ys.size,
     left: xs,
     middle: nil,
     right: ys
@@ -454,9 +439,6 @@ proc sameShape*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
     return false
 
   if xs.len != ys.len:
-    return false
-
-  if xs.depth != ys.depth:
     return false
 
   if xs.kind != ys.kind:
@@ -480,8 +462,7 @@ proc sameShape*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
   return true
 
 proc identical*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
-  if cast[pointer](xs) == cast[pointer](ys):
-    return true
+  cast[pointer](xs) == cast[pointer](ys)
 
 proc `==`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
   if xs.len != ys.len:
@@ -502,14 +483,9 @@ proc checkStructure*[T](tree: TernaryTreeList[T]): bool =
   if tree.kind == ternaryTreeLeaf:
     if tree.size != 1:
       raise newException(ValueError, fmt"Bad size at node {tree.formatInline}")
-    if tree.depth != 1:
-      raise newException(ValueError, fmt"Bad depth at node {tree.formatInline}")
   else:
     if tree.size != tree.left.len + tree.middle.len + tree.right.len:
       raise newException(ValueError, fmt"Bad size at branch {tree.formatInline}")
-    if tree.getDepth != max(@[tree.left.getDepth, tree.middle.getDepth, tree.right.getDepth]) + 1:
-      echo tree.getDepth, " ", tree.left.getDepth, " ", tree.middle.getDepth, " ", tree.right.getDepth
-      raise newException(ValueError, fmt"Bad depth at branch {tree.formatInline}")
 
     discard tree.left.checkStructure
     discard tree.middle.checkStructure
@@ -527,7 +503,7 @@ proc slice*[T](tree: TernaryTreeList[T], startIdx: int, endIdx: int): TernaryTre
   if startIdx > endIdx:
     raise newException(ValueError, fmt"Invalid slice range {startIdx}..{endIdx} for {tree}")
   if startIdx == endIdx:
-    return TernaryTreeList[T](kind: ternaryTreeBranch, depth: 1, size: 0)
+    return TernaryTreeList[T](kind: ternaryTreeBranch, size: 0)
 
   if tree.kind == ternaryTreeLeaf:
     if startIdx == 0 and endIdx == 1:
@@ -573,7 +549,7 @@ proc reverse*[T](tree: TernaryTreeList[T]): TernaryTreeList[T] =
     tree
   of ternaryTreeBranch:
     return TernaryTreeList[T](
-      kind: ternaryTreeBranch, depth: tree.depth, size: tree.size,
+      kind: ternaryTreeBranch, size: tree.size,
       left: tree.right.reverse,
       middle: tree.middle.reverse,
       right: tree.left.reverse
