@@ -47,13 +47,13 @@ proc depth*(tree: TernaryTreeMap): int =
 
 proc createLeaf[K, T](k: K, v: T): TernaryTreeMap[K, T] =
   TernaryTreeMap[K, T](
-    kind: ternaryTreeLeaf, size: 1,
+    kind: ternaryTreeLeaf,
     hash: k.hash, key: k, value: v
   )
 
 proc createLeaf[K, T](item: TernaryTreeMapKeyValuePair[K, T]): TernaryTreeMap[K, T] =
   TernaryTreeMap[K, T](
-    kind: ternaryTreeLeaf, size: 1,
+    kind: ternaryTreeLeaf,
     hash: item.k.hash, key: item.k, value: item.v
   )
 
@@ -65,14 +65,14 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
   case size
   of 0:
     TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: 0, maxHash: 0, minHash: 0,
+      kind: ternaryTreeBranch, maxHash: 0, minHash: 0,
       left: nil, middle: nil, right: nil
     )
   of 1:
     let middlePair = xs[0]
     let hashVal = middlePair.k.hash
     TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: 1, maxHash: hashVal, minHash: hashVal,
+      kind: ternaryTreeBranch, maxHash: hashVal, minHash: hashVal,
       left: nil, right: nil,
       middle: createLeaf(middlePair)
     )
@@ -80,7 +80,7 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
     let leftPair = xs[0]
     let rightPair = xs[1]
     TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: 2,
+      kind: ternaryTreeBranch,
       maxHash: rightPair.k.hash,
       minHash: leftPair.k.hash,
       middle: nil,
@@ -92,7 +92,7 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
     let middlePair = xs[1]
     let rightPair = xs[2]
     TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: 3,
+      kind: ternaryTreeBranch,
       maxHash: rightPair.k.hash,
       minHash: leftPair.k.hash,
       left: createLeaf(leftPair),
@@ -107,7 +107,7 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
     let right = initTernaryTreeMap(xs[(divided.left + divided.middle)..^1])
 
     TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: size,
+      kind: ternaryTreeBranch,
       maxHash: right.getMax,
       minHash: left.getMin,
       left: left, middle: middle, right: right
@@ -128,13 +128,16 @@ proc initTernaryTreeMap*[K, T](t: Table[K, T]): TernaryTreeMap[K, T] =
   initTernaryTreeMap(ys)
 
 proc `$`*(tree: TernaryTreeMap): string =
-  fmt"TernaryTreeMap[{tree.size}, ...]"
+  fmt"TernaryTreeMap[{tree.len}, ...]"
 
 proc len*(tree: TernaryTreeMap): int =
   if tree.isNil:
-    0
-  else:
-    tree.size
+    return 0
+  case tree.kind
+  of ternaryTreeLeaf:
+    return 1
+  of ternaryTreeBranch:
+    return tree.left.len + tree.middle.len + tree.right.len
 
 proc formatInline*(tree: TernaryTreeMap, withHash: bool = false): string =
   if tree.isNil:
@@ -244,8 +247,8 @@ proc checkStructure*(tree: TernaryTreeMap): bool =
     if tree.hash != tree.key.hash:
       raise newException(ValueError, fmt"Bad hash at leaf node {tree}")
 
-    if tree.size != 1:
-      raise newException(ValueError, fmt"Bad size at leaf node {tree}")
+    if tree.len != 1:
+      raise newException(ValueError, fmt"Bad len at leaf node {tree}")
 
   else:
     if not tree.left.isNil and not tree.middle.isNil:
@@ -260,9 +263,6 @@ proc checkStructure*(tree: TernaryTreeMap): bool =
     if not tree.middle.isNil and not tree.right.isNil:
       if tree.middle.getMax >= tree.right.getMin:
         raise newException(ValueError, fmt"Wrong hash order at middle/right branches {tree.formatInline(true)}")
-
-    if tree.size != tree.left.len + tree.middle.len + tree.right.len:
-      raise newException(ValueError, fmt"Wrong size at branch {tree}")
 
     if not tree.left.isNil:
       discard tree.left.checkStructure
@@ -305,7 +305,7 @@ proc assocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTr
   if not tree.left.isNil:
     if tree.left.rangeContainsHash(thisHash):
       return TernaryTreeMap[K, T](
-        kind: ternaryTreeBranch, size: tree.size,
+        kind: ternaryTreeBranch,
         maxHash: tree.maxHash,
         minHash: tree.minHash,
         left: tree.left.assocExisted(key, item),
@@ -316,7 +316,7 @@ proc assocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTr
   if not tree.middle.isNil:
     if tree.middle.rangeContainsHash(thisHash):
       return TernaryTreeMap[K, T](
-        kind: ternaryTreeBranch, size: tree.size,
+        kind: ternaryTreeBranch,
         maxHash: tree.maxHash,
         minHash: tree.minHash,
         left: tree.left,
@@ -327,7 +327,7 @@ proc assocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTr
   if not tree.right.isNil:
     if tree.right.rangeContainsHash(thisHash):
       return TernaryTreeMap[K, T](
-        kind: ternaryTreeBranch, size: tree.size,
+        kind: ternaryTreeBranch,
         maxHash: tree.maxHash,
         minHash: tree.minHash,
         left: tree.left,
@@ -356,14 +356,14 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
     else:
       if thisHash > tree.hash:
         return TernaryTreeMap[K, T](
-          kind: ternaryTreeBranch, size: 2, maxHash: thisHash, minHash: tree.hash,
+          kind: ternaryTreeBranch, maxHash: thisHash, minHash: tree.hash,
           left: nil,
           middle: tree,
           right: createLeaf(key, item),
         )
       else:
         return TernaryTreeMap[K, T](
-          kind: ternaryTreeBranch, size: 2, maxHash: tree.hash, minHash: thisHash,
+          kind: ternaryTreeBranch, maxHash: tree.hash, minHash: thisHash,
           left: createLeaf(key, item),
           middle: tree,
           right: nil,
@@ -371,7 +371,7 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
 
   if thisHash < tree.minHash:
     return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: tree.size + 1,
+      kind: ternaryTreeBranch,
       maxHash: tree.maxHash, minHash: thisHash,
       left: createLeaf(key, item),
       middle: tree,
@@ -380,7 +380,7 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
 
   if thisHash > tree.maxHash:
     return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: tree.size + 1,
+      kind: ternaryTreeBranch,
       maxHash: thisHash, minHash: tree.minHash,
       left: nil,
       middle: tree,
@@ -389,7 +389,7 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
 
   if tree.left.rangeContainsHash(thisHash):
     return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: tree.size + 1,
+      kind: ternaryTreeBranch,
       maxHash: tree.maxHash,
       minHash: tree.minHash,
       left: tree.left.assocNew(key, item),
@@ -398,7 +398,7 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
     )
   if tree.middle.rangeContainsHash(thisHash):
     return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: tree.size + 1,
+      kind: ternaryTreeBranch,
       maxHash: tree.maxHash,
       minHash: tree.minHash,
       left: tree.left,
@@ -407,7 +407,7 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
     )
   if tree.middle.rangeContainsHash(thisHash):
     return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: tree.size + 1,
+      kind: ternaryTreeBranch,
       maxHash: tree.maxHash,
       minHash: tree.minHash,
       left: tree.left,
@@ -418,7 +418,7 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
   if tree.middle.isSome:
     if thisHash < tree.middle.getMin:
       return TernaryTreeMap[K, T](
-        kind: ternaryTreeBranch, size: tree.size + 1,
+        kind: ternaryTreeBranch,
         maxHash: tree.maxHash,
         minHash: tree.minHash,
         left: tree.left.assocNew(key, item),
@@ -427,7 +427,7 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
       )
     else:
       return TernaryTreeMap[K, T](
-        kind: ternaryTreeBranch, size: tree.size + 1,
+        kind: ternaryTreeBranch,
         maxHash: tree.maxHash,
         minHash: tree.minHash,
         left: tree.left,
@@ -437,7 +437,7 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
 
   # not outbound, not at any branch, and middle is empty, so put in middle
   return TernaryTreeMap[K, T](
-    kind: ternaryTreeBranch, size: tree.size + 1,
+    kind: ternaryTreeBranch,
     maxHash: tree.maxHash,
     minHash: tree.minHash,
     left: tree.left,
@@ -455,7 +455,7 @@ proc assoc*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T, disableBalancing:
     result = tree.assocNew(key, item)
 
   if (not disableBalancing) and result.depth > 27:
-    if 3.roughIntPow(result.depth - 9) > result.size:
+    if 3.roughIntPow(result.depth - 9) > result.len:
       result.forceInplaceBalancing
 
 proc dissocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K, T] =
@@ -486,7 +486,7 @@ proc dissocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K,
       minHash = tree.right.getMin
 
     return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: tree.size - 1,
+      kind: ternaryTreeBranch,
       maxHash: tree.maxHash,
       minHash: minHash,
       left: changedBranch,
@@ -498,7 +498,7 @@ proc dissocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K,
     let changedBranch = tree.middle.dissocExisted(key)
 
     return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: tree.size - 1,
+      kind: ternaryTreeBranch,
       maxHash: tree.getMax,
       minHash: tree.minHash,
       left: tree.left,
@@ -518,7 +518,7 @@ proc dissocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K,
       maxHash = tree.left.getMax
 
     return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch, size: tree.size - 1,
+      kind: ternaryTreeBranch,
       maxHash: maxHash,
       minHash: tree.minHash,
       left: tree.left,

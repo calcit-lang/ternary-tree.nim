@@ -15,7 +15,6 @@ type
       value*: T
 
   TernaryTreeMap*[K, T] = ref object
-    size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
       maxHash*: int
