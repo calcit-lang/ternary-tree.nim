@@ -5,7 +5,6 @@ type
     ternaryTreeLeaf
 
   TernaryTreeList*[T] = ref object
-    depth*: int
     size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
@@ -16,7 +15,6 @@ type
       value*: T
 
   TernaryTreeMap*[K, T] = ref object
-    depth*: int
     size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
@@ -31,7 +29,6 @@ type
       value*: T
 
   TernaryTreeSet*[T] = ref object
-    depth*: int
     size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:

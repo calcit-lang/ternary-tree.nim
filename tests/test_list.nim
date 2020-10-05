@@ -5,7 +5,7 @@ import algorithm
 import ternary_tree
 
 test "init list":
-  check ($initTernaryTreeList[int](@[1,2,3,4]) == "TernaryTreeList[4, 3]")
+  check ($initTernaryTreeList[int](@[1,2,3,4]) == "TernaryTreeList[4, ...]")
 
   let origin11 = @[1,2,3,4,5,6,7,8,9,10,11]
   let data11 = initTernaryTreeList[int](origin11)

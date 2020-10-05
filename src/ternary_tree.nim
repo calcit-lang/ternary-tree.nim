@@ -8,7 +8,7 @@ export TernaryTreeList, TernaryTreeKind, TernaryTreeMap, TernaryTreeRevision, Pi
 
 export get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge, forceInplaceBalancing, sameShape, pairs, items, `[]`, identical
 
-export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains
+export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, depth
 
 export initTernaryTreeList, toSeq, first, last, rest, butlast, insert, assocBefore, assocAfter, prepend, append, concat, slice, reverse
 
