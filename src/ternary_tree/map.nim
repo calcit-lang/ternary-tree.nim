@@ -4,6 +4,7 @@ import options
 import hashes
 import strformat
 import algorithm
+import sequtils
 
 import ./types
 import ./utils
@@ -11,6 +12,10 @@ import ./utils
 type TernaryTreeMapKeyValuePair[K, V] = tuple
   k: K
   v: V
+
+type TernaryTreeMapKeyValuePairOfLeaf[K, V] = tuple
+  k: K
+  v: TernaryTreeMap[K, V]
 
 proc isLeaf(tree: TernaryTreeMap): bool =
   tree.kind == ternaryTreeLeaf
@@ -36,14 +41,15 @@ proc getMin(tree: TernaryTreeMap): int =
   of ternaryTreeBranch:
     tree.minHash
 
-proc depth*(tree: TernaryTreeMap): int =
+proc getDepth*(tree: TernaryTreeMap): int =
+  # echo "calling...", tree
   if tree.isNil:
     return 0
   case tree.kind
   of ternaryTreeLeaf:
     return 1
   else:
-    return max(@[tree.left.depth, tree.middle.depth, tree.right.depth]) + 1
+    return max(@[tree.left.getDepth, tree.middle.getDepth, tree.right.getDepth]) + 1
 
 proc createLeaf[K, T](k: K, v: T): TernaryTreeMap[K, T] =
   TernaryTreeMap[K, T](
@@ -59,7 +65,7 @@ proc createLeaf[K, T](item: TernaryTreeMapKeyValuePair[K, T]): TernaryTreeMap[K,
 
 # this proc is not exported, pick up next proc as the entry.
 # pairs must be sorted before passing to proc.
-proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): TernaryTreeMap[K, T] =
+proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): TernaryTreeMap[K, T] =
   let size = xs.len
 
   case size
@@ -74,7 +80,7 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
     TernaryTreeMap[K, T](
       kind: ternaryTreeBranch, maxHash: hashVal, minHash: hashVal,
       left: nil, right: nil,
-      middle: createLeaf(middlePair)
+      middle: middlePair.v
     )
   of 2:
     let leftPair = xs[0]
@@ -84,8 +90,8 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
       maxHash: rightPair.k.hash,
       minHash: leftPair.k.hash,
       middle: nil,
-      left: createLeaf(leftPair),
-      right:  createLeaf(rightPair),
+      left: leftPair.v,
+      right:  rightPair.v,
     )
   of 3:
     let leftPair = xs[0]
@@ -95,9 +101,9 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
       kind: ternaryTreeBranch,
       maxHash: rightPair.k.hash,
       minHash: leftPair.k.hash,
-      left: createLeaf(leftPair),
-      middle: createLeaf(middlePair),
-      right: createLeaf(rightPair),
+      left: leftPair.v,
+      middle: middlePair.v,
+      right: rightPair.v,
     )
   else:
     let divided = divideTernarySizes(size)
@@ -112,6 +118,13 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
       minHash: left.getMin,
       left: left, middle: middle, right: right
     )
+
+proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): TernaryTreeMap[K, T] =
+  let leavesList = xs.map(
+    proc(pair: TernaryTreeMapKeyValuePair[K, T]): TernaryTreeMapKeyValuePairOfLeaf[K, T] =
+      return (pair.k, createLeaf[K, T](pair))
+  )
+  initTernaryTreeMap(leavesList)
 
 proc initTernaryTreeMap*[K, T](t: Table[K, T]): TernaryTreeMap[K, T] =
   var xs: seq[TernaryTreeMapKeyValuePair[K, T]]
@@ -151,22 +164,49 @@ proc formatInline*(tree: TernaryTreeMap, withHash: bool = false): string =
   of ternaryTreeBranch:
     "(" & tree.left.formatInline(withHash) & " " & tree.middle.formatInline(withHash) & " " & tree.right.formatInline(withHash) & ")"
 
+proc isEmpty*(tree: TernaryTreeMap): bool =
+  if tree.isNil:
+    return true
+  case tree.kind
+  of ternaryTreeLeaf:
+    false
+  of ternaryTreeBranch:
+    tree.left.isNil and tree.middle.isNil and tree.right.isNil
+
+proc collectHashSortedSeq[K, T](tree: TernaryTreeMap[K, T], acc: var seq[TernaryTreeMapKeyValuePair[K, T]]): void =
+  if tree.isNil or tree.isEmpty:
+    discard
+  else:
+    case tree.kind
+    of ternaryTreeLeaf:
+      acc.add((tree.key, tree.value))
+    of ternaryTreeBranch:
+      tree.left.collectHashSortedSeq(acc)
+      tree.middle.collectHashSortedSeq(acc)
+      tree.right.collectHashSortedSeq(acc)
+
 # sorted by hash(tree.key)
 proc toHashSortedSeq*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePair[K, T]] =
-  if tree.isNil or tree.len == 0:
-    return @[]
-  if tree.kind == ternaryTreeLeaf:
-    return @[(tree.key, tree.value)]
-
   var acc: seq[TernaryTreeMapKeyValuePair[K, T]]
+  collectHashSortedSeq(tree, acc)
+  return acc
 
-  for item in tree.left.toHashSortedSeq:
-    acc.add item
-  for item in tree.middle.toHashSortedSeq:
-    acc.add item
-  for item in tree.right.toHashSortedSeq:
-    acc.add item
+proc collectHashSortedSeqOfLeaf[K, T](tree: TernaryTreeMap[K, T], acc: var seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): void =
+  if tree.isNil or tree.isEmpty:
+    discard
+  else:
+    case tree.kind
+    of ternaryTreeLeaf:
+      acc.add((tree.key, tree))
+    of ternaryTreeBranch:
+      tree.left.collectHashSortedSeqOfLeaf(acc)
+      tree.middle.collectHashSortedSeqOfLeaf(acc)
+      tree.right.collectHashSortedSeqOfLeaf(acc)
 
+# for reusing leaves during rebalancing
+proc toHashSortedSeqOfLeaves*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]] =
+  var acc: seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]
+  collectHashSortedSeqOfLeaf(tree, acc)
   return acc
 
 proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
@@ -282,7 +322,7 @@ proc rangeContainsHash*[K, T](tree: TernaryTreeMap[K, T], thisHash: Hash): bool 
     thisHash >= tree.getMin and thisHash <= tree.getMax
 
 proc assocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMap[K, T] =
-  if tree.isNil or tree.len == 0:
+  if tree.isNil or tree.isEmpty:
     raise newException(ValueError, "Cannot call assoc on nil")
 
   let thisHash = key.hash
@@ -345,7 +385,7 @@ proc isSome*[K, T](tree: TernaryTreeMap[K, T]): bool =
 
 proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMap[K, T] =
   # echo fmt"assoc new: {key} to {tree.formatInline}"
-  if tree.isNil or tree.len == 0:
+  if tree.isNil or tree.isEmpty:
     return createLeaf(key, item)
 
   let thisHash = key.hash
@@ -446,17 +486,13 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
   )
 
 proc assoc*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T, disableBalancing: bool = false): TernaryTreeMap[K, T] =
-  if tree.isNil or tree.len == 0:
+  if tree.isNil or tree.isEmpty:
     return createLeaf(key, item)
 
   if tree.contains(key):
     result = tree.assocExisted(key, item)
   else:
     result = tree.assocNew(key, item)
-
-  if (not disableBalancing) and result.depth > 27:
-    if 3.roughIntPow(result.depth - 9) > result.len:
-      result.forceInplaceBalancing
 
 proc dissocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K, T] =
   if tree.isNil:
@@ -583,7 +619,7 @@ proc `==`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
   if xs.len != ys.len:
     return false
 
-  if xs.len == 0:
+  if xs.isEmpty:
     return true
 
   if xs.identical(ys):
@@ -598,17 +634,22 @@ proc `==`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
 
 proc merge*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): TernaryTreeMap[K, V] =
   result = xs
+  var acc = 0
   for key in ys.keys:
     let item = ys.get(key)
     if item.isSome:
       result = result.assoc(key, ys.get(key).get)
     else:
       raise newException(ValueError, "Unexpected nil value during merge")
+    acc = acc + 1
+  # TODO might pick a better condition
+  if acc > 27:
+    result.forceInplaceBalancing
 
 # this function mutates original tree to make it more balanced
 proc forceInplaceBalancing*[K,T](tree: TernaryTreeMap[K,T]): void =
   # echo "Force inplace balancing of list"
-  let xs = tree.toHashSortedSeq
+  let xs = tree.toHashSortedSeqOfLeaves
   let newTree = initTernaryTreeMap(xs)
   tree.left = newTree.left
   tree.middle = newTree.middle
