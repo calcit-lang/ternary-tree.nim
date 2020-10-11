@@ -2,3 +2,6 @@
 tests/test_list
 tests/test_map
 tests/test_revision
+tests/costs
+
+profile_results.txt

@@ -10,6 +10,8 @@ test "init list":
   let origin11 = @[1,2,3,4,5,6,7,8,9,10,11]
   let data11 = initTernaryTreeList[int](origin11)
 
+  check data11.checkStructure
+
   check (data11.formatInline == "((1 (2 _ 3) 4) (5 6 7) (8 (9 _ 10) 11))")
   check (origin11 == data11.toSeq)
 
