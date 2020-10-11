@@ -10,6 +10,6 @@ export get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge, forc
 
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, depth
 
-export initTernaryTreeList, toSeq, first, last, rest, butlast, insert, assocBefore, assocAfter, prepend, append, concat, slice, reverse
+export initTernaryTreeList, toSeq, first, last, rest, butlast, insert, assocBefore, assocAfter, prepend, append, concat, slice, reverse, getDepth
 
 export initTernaryTreeRevision, stringToSeqPath, seqToStringPath

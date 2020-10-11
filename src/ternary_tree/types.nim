@@ -8,6 +8,7 @@ type
     size*: int
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
+      depth*: int
       left*: TernaryTreeList[T]
       middle*: TernaryTreeList[T]
       right*: TernaryTreeList[T]
@@ -17,6 +18,7 @@ type
   TernaryTreeMap*[K, T] = ref object
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
+      depth*: int
       maxHash*: int
       minHash*: int
       left*: TernaryTreeMap[K, T]
@@ -25,19 +27,6 @@ type
     of ternaryTreeLeaf:
       hash*: int
       key*: K
-      value*: T
-
-  TernaryTreeSet*[T] = ref object
-    size*: int
-    case kind*: TernaryTreeKind
-    of ternaryTreeBranch:
-      max*: int
-      min*: int
-      left*: TernaryTreeSet[T]
-      middle*: TernaryTreeSet[T]
-      right*: TernaryTreeSet[T]
-    of ternaryTreeLeaf:
-      hash*: int
       value*: T
 
   TernaryTreeRevision*[T] = ref object
