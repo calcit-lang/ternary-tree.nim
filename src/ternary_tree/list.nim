@@ -124,9 +124,9 @@ proc get*[T](tree: TernaryTreeList[T], idx: int): T =
     else:
       raise newException(ValueError, fmt"Cannot get from leaf with index {idx}")
 
-  var leftSize = tree.left.len
-  var middleSize = tree.middle.len
-  var rightSize = tree.right.len
+  let leftSize = tree.left.len
+  let middleSize = tree.middle.len
+  let rightSize = tree.right.len
 
   if leftSize + middleSize + rightSize != tree.size:
     raise newException(ValueError, "tree.size does not match sum of branch sizes")
@@ -165,9 +165,9 @@ proc assoc*[T](tree: TernaryTreeList[T], idx: int, item: T): TernaryTreeList[T] 
     else:
       raise newException(ValueError, fmt"Cannot get from leaf with index {idx}")
 
-  var leftSize = tree.left.len
-  var middleSize = tree.middle.len
-  var rightSize = tree.right.len
+  let leftSize = tree.left.len
+  let middleSize = tree.middle.len
+  let rightSize = tree.right.len
 
   if leftSize + middleSize + rightSize != tree.size:
     raise newException(ValueError, "tree.size does not match sum of branch sizes")
@@ -225,9 +225,9 @@ proc dissoc*[T](tree: TernaryTreeList[T], idx: int): TernaryTreeList[T] =
   if tree.kind == ternaryTreeLeaf:
     raise newException(ValueError, "dissoc should be handled at branches")
 
-  var leftSize = tree.left.len
-  var middleSize = tree.middle.len
-  var rightSize = tree.right.len
+  let leftSize = tree.left.len
+  let middleSize = tree.middle.len
+  let rightSize = tree.right.len
 
   if leftSize + middleSize + rightSize != tree.size:
     raise newException(ValueError, "tree.size does not match sum of branch sizes")
@@ -376,9 +376,9 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
           right: tree.right
         )
 
-  var leftSize = tree.left.len
-  var middleSize = tree.middle.len
-  var rightSize = tree.right.len
+  let leftSize = tree.left.len
+  let middleSize = tree.middle.len
+  let rightSize = tree.right.len
 
   if leftSize + middleSize + rightSize != tree.size:
     raise newException(ValueError, "tree.size does not match sum of branch sizes")
