@@ -162,3 +162,12 @@ test "reverse":
   let reversedData = data.reverse
   check data.toSeq.reversed == reversedData.toSeq
   check reversedData.checkStructure
+
+test "list each":
+  var i = 0
+  let data = initTernaryTreeList[int](@[1,2,3,4,5,6,7,8,9,10])
+  data.each(proc(x: int) =
+    i = i + 1
+    discard
+  )
+  check i == 10

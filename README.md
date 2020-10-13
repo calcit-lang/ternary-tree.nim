@@ -77,6 +77,10 @@ data.merge(data)
 
 data == data
 data.identical(data) # compare by reference
+
+data.each(proc(x: int) =
+  echo x
+)
 ```
 
 * Revision
@@ -100,6 +104,10 @@ data.assoc "j", 11
 data.assocBefore "j", 11
 data.assocAfter "j", 11
 data.formatInline
+
+data.each(proc(k: string, v: int): void =
+  # echo fmt"{k}-{v}"
+)
 ```
 
 - Sets
