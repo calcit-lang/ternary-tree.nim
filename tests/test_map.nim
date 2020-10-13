@@ -150,3 +150,17 @@ test "iterator":
   for key in data:
     i = i + 1
   check (i == 4)
+
+test "each map":
+  var dict: Table[string, int]
+  for idx in 0..<100:
+    dict[fmt"{idx}"] = idx + 10
+
+  let data = initTernaryTreeMap(dict)
+
+  var i = 0
+  data.each(proc(k: string, v: int): void =
+    # echo fmt"..{k}-{v}.."
+    i = i + 1
+  )
+  check i == 100

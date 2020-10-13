@@ -6,7 +6,7 @@ import ternary_tree/revision
 
 export TernaryTreeList, TernaryTreeKind, TernaryTreeMap, TernaryTreeRevision, PickBranch
 
-export get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge, forceInplaceBalancing, sameShape, pairs, items, `[]`, identical
+export get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge, forceInplaceBalancing, sameShape, pairs, items, `[]`, identical, each
 
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, isEmpty
 

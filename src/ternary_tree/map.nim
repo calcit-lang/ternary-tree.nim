@@ -571,6 +571,16 @@ proc dissoc*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K, T] =
   else:
     tree
 
+proc each*[K, T](tree: TernaryTreeMap[K, T], f: proc(k: K, v: T): void): void =
+  if tree.isNil:
+    return
+  if tree.kind == ternaryTreeLeaf:
+    f(tree.key, tree.value)
+  else:
+    tree.left.each(f)
+    tree.middle.each(f)
+    tree.right.each(f)
+
 proc toPairs*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePair[K, T]] =
   if tree.isNil:
     return @[]

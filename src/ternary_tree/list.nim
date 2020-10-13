@@ -103,6 +103,20 @@ proc toSeq*[T](tree: TernaryTreeList[T]): seq[T] =
   writeSeq(tree, acc, counter)
   return acc
 
+proc each*[T](tree: TernaryTreeList[T], f: proc(x: T): void): void =
+  if tree.isNil:
+    discard
+  case tree.kind
+  of ternaryTreeLeaf:
+    f(tree.value)
+  of ternaryTreeBranch:
+    if not tree.left.isNil:
+      tree.left.each(f)
+    if not tree.middle.isNil:
+      tree.middle.each(f)
+    if not tree.right.isNil:
+      tree.right.each(f)
+
 proc writeLeavesSeq*[T](tree: TernaryTreeList[T], acc: var seq[TernaryTreeList[T]], idx: RefInt): void =
   if tree.isNil:
     discard
