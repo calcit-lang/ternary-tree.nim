@@ -40,3 +40,5 @@ type
 
   PickBranch* = enum
     pickLeft, pickMiddle, pickRight
+
+  RefInt* = ref int

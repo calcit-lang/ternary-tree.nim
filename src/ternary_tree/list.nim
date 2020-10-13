@@ -23,20 +23,20 @@ proc decideParentDepth[T](xs: varargs[TernaryTreeList[T]]): int =
       depth = y
   return depth + 1
 
-proc initTernaryTreeList*[T](size: int, offset: int, xs: var seq[T]): TernaryTreeList[T] =
+proc initTernaryTreeList*[T](size: int, offset: int, xs: var seq[TernaryTreeList[T]]): TernaryTreeList[T] =
   case size
     of 0:
       TernaryTreeList[T](kind: ternaryTreeBranch, size: 0, depth: 1)
     of 1:
-      TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[offset + 0])
+      xs[offset + 0]
     of 2:
-      let left = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[offset + 0])
-      let right = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[offset + 1])
+      let left = xs[offset + 0]
+      let right = xs[offset + 1]
       TernaryTreeList[T](kind: ternaryTreeBranch, size: 2, left: left, right: right, depth: 2)
     of 3:
-      let left = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[offset + 0])
-      let middle = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[offset + 1])
-      let right = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: xs[offset + 2])
+      let left = xs[offset + 0]
+      let middle = xs[offset + 1]
+      let right = xs[offset + 2]
       TernaryTreeList[T](kind: ternaryTreeBranch, size: 3, left: left, middle: middle, right: right, depth: 2)
     else:
       let divided = divideTernarySizes(size)
@@ -51,7 +51,9 @@ proc initTernaryTreeList*[T](size: int, offset: int, xs: var seq[T]): TernaryTre
       )
 
 proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
-  var ys = xs
+  var ys = newSeq[TernaryTreeList[T]](xs.len)
+  for idx, x in xs:
+    ys[idx] = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: x)
   initTernaryTreeList(xs.len, 0, ys)
 
 proc `$`*(tree: TernaryTreeList): string =
@@ -79,32 +81,60 @@ proc formatInline*(tree: TernaryTreeList): string =
     "(" & tree.left.formatInline & " " & tree.middle.formatInline & " " & tree.right.formatInline & ")"
     # "(" & tree.left.formatInline & " " & tree.middle.formatInline & " " & tree.right.formatInline & fmt")@{tree.depth} " & fmt"{tree.left.getDepth} {tree.middle.getDepth} {tree.right.getDepth}..."
 
-proc writeSeq*[T](tree: TernaryTreeList[T], acc: var seq[T]): void =
+proc writeSeq*[T](tree: TernaryTreeList[T], acc: var seq[T], idx: RefInt): void =
   if tree.isNil:
     discard
   case tree.kind
   of ternaryTreeLeaf:
-    acc.add tree.value
+    acc[idx[]] = tree.value
+    idx[] = idx[] + 1
   of ternaryTreeBranch:
     if not tree.left.isNil:
-      tree.left.writeSeq(acc)
+      tree.left.writeSeq(acc, idx)
     if not tree.middle.isNil:
-      tree.middle.writeSeq(acc)
+      tree.middle.writeSeq(acc, idx)
     if not tree.right.isNil:
-      tree.right.writeSeq(acc)
+      tree.right.writeSeq(acc, idx)
 
 proc toSeq*[T](tree: TernaryTreeList[T]): seq[T] =
-  var acc: seq[T]
-  writeSeq(tree, acc)
+  var acc = newSeq[T](tree.len)
+  var counter = new RefInt
+  counter[] = 0
+  writeSeq(tree, acc, counter)
+  return acc
+
+proc writeLeavesSeq*[T](tree: TernaryTreeList[T], acc: var seq[TernaryTreeList[T]], idx: RefInt): void =
+  if tree.isNil:
+    discard
+  case tree.kind
+  of ternaryTreeLeaf:
+    acc[idx[]] = tree
+    idx[] = idx[] + 1
+  of ternaryTreeBranch:
+    if not tree.left.isNil:
+      tree.left.writeLeavesSeq(acc, idx)
+    if not tree.middle.isNil:
+      tree.middle.writeLeavesSeq(acc, idx)
+    if not tree.right.isNil:
+      tree.right.writeLeavesSeq(acc, idx)
+
+proc toLeavesSeq*[T](tree: TernaryTreeList[T]): seq[TernaryTreeList[T]] =
+  var acc = newSeq[TernaryTreeList[T]](tree.len)
+  var counter = new RefInt
+  counter[] = 0
+  writeLeavesSeq(tree, acc, counter)
   return acc
 
 # recursive iterator not supported, use slow seq for now
 # https://forum.nim-lang.org/t/5697
 iterator items*[T](tree: TernaryTreeList[T]): T =
-  let seqItems = tree.toSeq()
+  # let seqItems = tree.toSeq()
 
-  for x in seqItems:
-    yield x
+  # for x in seqItems:
+  #   yield x
+
+  for idx in 0..<tree.len:
+    yield tree[idx]
 
 iterator pairs*[T](tree: TernaryTreeList[T]): tuple[k: int, v: T] =
   let seqItems = tree.toSeq()
@@ -426,8 +456,9 @@ proc assocAfter*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = f
 # this function mutates original tree to make it more balanced
 proc forceInplaceBalancing*[T](tree: TernaryTreeList[T]): void =
   # echo "Force inplace balancing of list: ", tree.size
-  var ys = tree.toSeq
+  var ys = tree.toLeavesSeq()
   let newTree = initTernaryTreeList(ys.len, 0.int, ys)
+  # let newTree = initTernaryTreeList(ys)
   tree.left = newTree.left
   tree.middle = newTree.middle
   tree.right = newTree.right

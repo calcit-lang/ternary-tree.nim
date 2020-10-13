@@ -4,16 +4,23 @@ import tables
 import strformat
 import algorithm
 import hashes
+import times
 
 import ternary_tree
 
+let n = 10000
+
 proc testList(): void =
   var data = initTernaryTreeList[int](@[])
-  for idx in 0..<8000:
+  for idx in 0..<n:
     data = data.append(idx)
 
-  for idx in 0..<8000:
-    discard data[idx]
+  for y in 0..<100:
+    for idx in 0..<n:
+      discard data[idx]
+
+    for item in data:
+      discard item
 
 proc testMap(): void =
   var dict: Table[string, int]
@@ -29,4 +36,10 @@ proc testMap(): void =
   echo data10.getDepth
 
 
-testMap()
+let t1 = now()
+
+# testMap()
+testList()
+
+let t2 = now()
+echo "Costs: ", t2 - t1
