@@ -1,7 +1,10 @@
 
+import tables
+import strformat
+
 import ternary_tree
 
-proc tryShape(): void =
+proc tryListShape(): void =
   var data = initTernaryTreeList[int](@[])
 
   for i in 0..<82:
@@ -9,4 +12,15 @@ proc tryShape(): void =
     echo data.getDepth, " : ", data.formatInline
 
 
-tryShape()
+
+proc tryMapShape(): void =
+  var dict: Table[string, int]
+  var data = initTernaryTreeMap(dict)
+
+  for idx in 0..<30:
+    data = data.assoc(fmt"{idx}", idx + 10)
+    echo data.formatInline
+
+# tryListShape()
+
+tryMapShape()

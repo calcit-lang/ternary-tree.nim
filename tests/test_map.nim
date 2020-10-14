@@ -57,7 +57,7 @@ test "assoc map":
   check data.contains("12") == false
 
   check data.assoc("1", 2222).formatInline(false) == "((2:12 3:13 7:17) ((_ 9:19 _) (6:16 _ 5:15) (_ 1:2222 _)) (8:18 0:10 4:14))"
-  check data.assoc("23", 2222).formatInline(false) == "((2:12 3:13 7:17) ((_ 9:19 _) (6:16 _ 5:15) (23:2222 (_ 1:11 _) _)) (8:18 0:10 4:14))"
+  check data.assoc("23", 2222).formatInline(false) == "((2:12 3:13 7:17) ((_ 9:19 _) (6:16 _ 5:15) (23:2222 1:11 _)) (8:18 0:10 4:14))"
 
 test "dissoc":
 

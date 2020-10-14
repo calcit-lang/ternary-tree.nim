@@ -410,22 +410,58 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
         )
 
   if thisHash < tree.minHash:
-    return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch,
-      maxHash: tree.maxHash, minHash: thisHash,
-      left: createLeaf(key, item),
-      middle: tree,
-      right: nil,
-    )
+    if tree.left.isNil:
+      if tree.middle.isNil:
+        return TernaryTreeMap[K, T](
+          kind: ternaryTreeBranch,
+          maxHash: tree.maxHash, minHash: thisHash,
+          left: nil,
+          middle: createLeaf(key, item),
+          right: tree.right,
+        )
+      else:
+        return TernaryTreeMap[K, T](
+          kind: ternaryTreeBranch,
+          maxHash: tree.maxHash, minHash: thisHash,
+          left: createLeaf(key, item),
+          middle: tree.middle,
+          right: tree.right,
+        )
+    else:
+      return TernaryTreeMap[K, T](
+        kind: ternaryTreeBranch,
+        maxHash: tree.maxHash, minHash: thisHash,
+        left: createLeaf(key, item),
+        middle: tree,
+        right: nil,
+      )
 
   if thisHash > tree.maxHash:
-    return TernaryTreeMap[K, T](
-      kind: ternaryTreeBranch,
-      maxHash: thisHash, minHash: tree.minHash,
-      left: nil,
-      middle: tree,
-      right: createLeaf(key, item),
-    )
+    if tree.right.isNil:
+      if tree.middle.isNil:
+        return TernaryTreeMap[K, T](
+          kind: ternaryTreeBranch,
+          maxHash: thisHash, minHash: tree.minHash,
+          left: tree.left,
+          middle: createLeaf(key, item),
+          right: nil,
+        )
+      else:
+        return TernaryTreeMap[K, T](
+          kind: ternaryTreeBranch,
+          maxHash: thisHash, minHash: tree.minHash,
+          left: tree.left,
+          middle: tree.middle,
+          right: createLeaf(key, item),
+        )
+    else:
+      return TernaryTreeMap[K, T](
+        kind: ternaryTreeBranch,
+        maxHash: thisHash, minHash: tree.minHash,
+        left: nil,
+        middle: tree,
+        right: createLeaf(key, item),
+      )
 
   if tree.left.rangeContainsHash(thisHash):
     return TernaryTreeMap[K, T](
