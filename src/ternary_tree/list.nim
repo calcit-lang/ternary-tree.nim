@@ -156,44 +156,52 @@ iterator pairs*[T](tree: TernaryTreeList[T]): tuple[k: int, v: T] =
   for idx, x in seqItems:
     yield (idx, x)
 
-proc get*[T](tree: TernaryTreeList[T], idx: int): T =
-  if idx < 0:
-    raise newException(ValueError, "Cannot index negative number")
-  if idx > (tree.size - 1):
-    raise newException(ValueError, "Index too large")
+proc loopGet*[T](originalTree: TernaryTreeList[T], originalIdx: int): T =
+  var tree = originalTree
+  var idx = originalIdx
+  while tree.isNil.not:
+    if idx < 0:
+      raise newException(ValueError, "Cannot index negative number")
 
-  if tree.kind == ternaryTreeLeaf:
-    if idx == 0:
-      return tree.value
+    if tree.kind == ternaryTreeLeaf:
+      if idx == 0:
+        return tree.value
+      else:
+        raise newException(ValueError, fmt"Cannot get from leaf with index {idx}")
+
+    if idx > (tree.size - 1):
+      raise newException(ValueError, "Index too large")
+
+    let leftSize = tree.left.len
+    let middleSize = tree.middle.len
+    let rightSize = tree.right.len
+
+    if leftSize + middleSize + rightSize != tree.size:
+      raise newException(ValueError, "tree.size does not match sum of branch sizes")
+
+    if idx <= leftSize - 1:
+      tree = tree.left
+    elif idx <= leftSize + middleSize - 1:
+      tree = tree.middle
+      idx = idx - leftSize
     else:
-      raise newException(ValueError, fmt"Cannot get from leaf with index {idx}")
+      tree = tree.right
+      idx = idx - leftSize - middleSize
 
-  let leftSize = tree.left.len
-  let middleSize = tree.middle.len
-  let rightSize = tree.right.len
-
-  if leftSize + middleSize + rightSize != tree.size:
-    raise newException(ValueError, "tree.size does not match sum of branch sizes")
-
-  if idx <= leftSize - 1:
-    return tree.left.get(idx)
-  elif idx <= leftSize + middleSize - 1:
-    return tree.middle.get(idx - leftSize)
-  else:
-    return tree.right.get(idx - leftSize - middleSize)
+  raise newException(ValueError, fmt"Failed to get {idx}")
 
 proc `[]`*[T](tree: TernaryTreeList[T], idx: int): T =
-  tree.get(idx)
+  tree.loopGet(idx)
 
 proc first*[T](tree: TernaryTreeList[T]): T =
   if tree.len > 0:
-    tree.get(0)
+    tree.loopGet(0)
   else:
     raise newException(ValueError, "Cannot get from empty list")
 
 proc last*[T](tree: TernaryTreeList[T]): T =
   if tree.len > 0:
-    tree.get(tree.len - 1)
+    tree.loopGet(tree.len - 1)
   else:
     raise newException(ValueError, "Cannot get from empty list")
 
@@ -311,7 +319,7 @@ proc dissoc*[T](tree: TernaryTreeList[T], idx: int): TernaryTreeList[T] =
     )
 
   if result.len == 1:
-    result = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: result.get(0))
+    result = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: result.loopGet(0))
 
   return result
 
@@ -699,7 +707,7 @@ proc `==`*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
     return true
 
   for idx in 0..<xs.len:
-    if xs.get(idx) != ys.get(idx):
+    if xs.loopGet(idx) != ys.loopGet(idx):
       return false
 
   return true

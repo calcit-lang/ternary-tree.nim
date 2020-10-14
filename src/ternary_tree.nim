@@ -6,10 +6,10 @@ import ternary_tree/revision
 
 export TernaryTreeList, TernaryTreeKind, TernaryTreeMap, TernaryTreeRevision, PickBranch
 
-export get, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge, forceInplaceBalancing, sameShape, pairs, items, `[]`, identical, each
+export loopGet, checkStructure, assoc, dissoc, len, toPairs, keys, `==`, merge, forceInplaceBalancing, sameShape, pairs, items, `[]`, identical, each
 
 export initTernaryTreeMap, `$`, formatInline, toHashSortedSeq, contains, isEmpty
 
 export initTernaryTreeList, toSeq, first, last, rest, butlast, insert, assocBefore, assocAfter, prepend, append, concat, slice, reverse, getDepth
 
-export initTernaryTreeRevision, stringToSeqPath, seqToStringPath
+export initTernaryTreeRevision, stringToSeqPath, seqToStringPath, get

@@ -242,42 +242,52 @@ proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
 
   return false
 
-proc get*[K, T](tree: TernaryTreeMap[K, T], item: K): Option[T] =
-
-  if tree.isLeaf:
-    if tree.key == item:
-      return some(tree.value)
-    else:
-      return none(T)
-
+proc loopGet*[K, T](originalTree: TernaryTreeMap[K, T], item: K): Option[T] =
   let hx = item.hash
-  # echo "looking for: ", hx, " ", item, " in ", tree.formatInline
 
-  if not tree.left.isNil:
-    if tree.left.kind == ternaryTreeLeaf:
-      if tree.left.hash == hx:
-        return some(tree.left.value)
-    elif hx >= tree.left.minHash and hx <= tree.left.maxHash:
-      return tree.left.get(item)
+  var tree = originalTree
 
-  if not tree.middle.isNil:
-    if tree.middle.kind == ternaryTreeLeaf:
-      if tree.middle.hash == hx:
-        return some(tree.middle.value)
-    elif hx >= tree.middle.minHash and hx <= tree.middle.maxHash:
-      return tree.middle.get(item)
+  while tree.isNil.not:
 
-  if not tree.right.isNil:
-    if tree.right.kind == ternaryTreeLeaf:
-      if tree.right.hash == hx:
-        return some(tree.right.value)
-    elif hx >= tree.right.minHash and hx <= tree.right.maxHash:
-      return tree.right.get(item)
+    if tree.isLeaf:
+      if tree.key == item:
+        return some(tree.value)
+      else:
+        return none(T)
+
+    # echo "looking for: ", hx, " ", item, " in ", tree.formatInline
+
+    if not tree.left.isNil:
+      if tree.left.kind == ternaryTreeLeaf:
+        if tree.left.hash == hx:
+          return some(tree.left.value)
+      elif hx >= tree.left.minHash and hx <= tree.left.maxHash:
+        tree = tree.left
+        continue
+
+    if not tree.middle.isNil:
+      if tree.middle.kind == ternaryTreeLeaf:
+        if tree.middle.hash == hx:
+          return some(tree.middle.value)
+      elif hx >= tree.middle.minHash and hx <= tree.middle.maxHash:
+        tree = tree.middle
+        continue
+
+    if not tree.right.isNil:
+      if tree.right.kind == ternaryTreeLeaf:
+        if tree.right.hash == hx:
+          return some(tree.right.value)
+      elif hx >= tree.right.minHash and hx <= tree.right.maxHash:
+        tree = tree.right
+        continue
+
+    return none(T)
 
   return none(T)
 
+
 proc `[]`*[K, T](tree: TernaryTreeMap[K, T], key: K): Option[T] =
-  tree.get(key)
+  tree.loopGet(key)
 
 # leaves on the left has smaller hashes
 # TODO check sizes, hashes
@@ -690,7 +700,7 @@ proc `==`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
   let keys = xs.keys
   for key in keys:
 
-    if xs.get(key) != ys.get(key):
+    if xs.loopGet(key) != ys.loopGet(key):
       return false
   return true
 
@@ -698,9 +708,9 @@ proc merge*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): TernaryTre
   result = xs
   var acc = 0
   for key in ys.keys:
-    let item = ys.get(key)
+    let item = ys.loopGet(key)
     if item.isSome:
-      result = result.assoc(key, ys.get(key).get)
+      result = result.assoc(key, ys.loopGet(key).get)
     else:
       raise newException(ValueError, "Unexpected nil value during merge")
     acc = acc + 1

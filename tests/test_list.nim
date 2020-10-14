@@ -21,7 +21,7 @@ test "list operations":
 
   # get
   for idx in 0..<origin11.len:
-    check (origin11[idx] == data11.get(idx))
+    check (origin11[idx] == data11.loopGet(idx))
     check (origin11[idx] == data11[idx])
 
   check (data11.first == 1)
@@ -31,8 +31,8 @@ test "list operations":
   let origin5 = @[1,2,3,4,5]
   let data5 = initTernaryTreeList(origin5)
   let updated = data5.assoc(3, 10)
-  check (updated.get(3) == 10)
-  check (data5.get(3) == 4)
+  check (updated.loopGet(3) == 10)
+  check (data5.loopGet(3) == 4)
   check (updated.len == data5.len)
 
   for idx in 0..<data5.len:
