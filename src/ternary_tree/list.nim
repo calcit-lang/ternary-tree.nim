@@ -338,22 +338,25 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
     raise newException(ValueError, "Empty node is not a correct position for inserting")
 
   if tree.kind == ternaryTreeLeaf:
-    var left: TernaryTreeList[T] = nil
-    var right: TernaryTreeList[T] = nil
-
     if after:
-      right = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
+      return TernaryTreeList[T](
+        kind: ternaryTreeBranch,
+        depth: tree.getDepth + 1,
+        size: 2,
+        left: tree,
+        middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+        right: nil
+      )
     else:
-      left = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
 
-    return TernaryTreeList[T](
-      kind: ternaryTreeBranch,
-      depth: tree.getDepth + 1,
-      size: 2,
-      left: left,
-      middle: tree,
-      right: right
-    )
+      return TernaryTreeList[T](
+        kind: ternaryTreeBranch,
+        depth: tree.getDepth + 1,
+        size: 2,
+        left: nil,
+        middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+        right: tree
+      )
 
   if tree.len == 1:
     if after:
@@ -375,6 +378,15 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
           middle: tree.middle,
           right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
         )
+      else:
+        return TernaryTreeList[T](
+          kind: ternaryTreeBranch,
+          size: 2,
+          depth: 2,
+          left: tree.right,
+          middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+          right: nil
+        )
     else:
       if tree.right != nil:
         return TernaryTreeList[T](
@@ -394,31 +406,121 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
           middle: tree.middle,
           right: nil
         )
+      else:
+        return TernaryTreeList[T](
+          kind: ternaryTreeBranch,
+          size: 2,
+          depth: tree.middle.getDepth + 1,
+          left: nil,
+          middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+          right: tree.left
+        )
 
   if tree.len == 2:
     if after:
       if tree.right.isNil:
-        let changedBranch = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
         return TernaryTreeList[T](
           kind: ternaryTreeBranch,
           size: 3,
           depth: 2,
           left: tree.left,
           middle: tree.middle,
-          right: changedBranch
+          right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
         )
-
+      elif tree.middle.isNil:
+        if idx == 0:
+          return TernaryTreeList[T](
+            kind: ternaryTreeBranch,
+            size: 3,
+            depth: 2,
+            left: tree.left,
+            middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+            right: tree.right
+          )
+        elif idx == 1:
+          return TernaryTreeList[T](
+            kind: ternaryTreeBranch,
+            size: 3,
+            depth: 2,
+            left: tree.left,
+            middle: tree.right,
+            right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
+          )
+        else:
+          raise newException(ValueError, fmt"Unexpected idx: {idx}")
+      else:
+        if idx == 0:
+          return TernaryTreeList[T](
+            kind: ternaryTreeBranch,
+            size: 3,
+            depth: 2,
+            left: tree.middle,
+            middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+            right: tree.right
+          )
+        elif idx == 1:
+          return TernaryTreeList[T](
+            kind: ternaryTreeBranch,
+            size: 3,
+            depth: 2,
+            left: tree.middle,
+            middle: tree.right,
+            right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
+          )
+        else:
+          raise newException(ValueError, fmt"Unexpected idx: {idx}")
     else:
       if tree.left.isNil:
-        let changedBranch = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
         return TernaryTreeList[T](
           kind: ternaryTreeBranch,
           size: 3,
           depth: 2,
-          left: changedBranch,
+          left: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
           middle: tree.middle,
           right: tree.right
         )
+      elif tree.middle.isNil:
+        if idx == 0:
+          return TernaryTreeList[T](
+            kind: ternaryTreeBranch,
+            size: 3,
+            depth: 2,
+            left: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+            middle: tree.left,
+            right: tree.right
+          )
+        elif idx == 1:
+          return TernaryTreeList[T](
+            kind: ternaryTreeBranch,
+            size: 3,
+            depth: 2,
+            left: tree.left,
+            middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+            right: tree.right
+          )
+        else:
+          raise newException(ValueError, fmt"Unexpected idx: {idx}")
+      else:
+        if idx == 0:
+          return TernaryTreeList[T](
+            kind: ternaryTreeBranch,
+            size: 3,
+            depth: 2,
+            left: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+            middle: tree.left,
+            right: tree.middle
+          )
+        elif idx == 1:
+          return TernaryTreeList[T](
+            kind: ternaryTreeBranch,
+            size: 3,
+            depth: 2,
+            left: tree.left,
+            middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+            right: tree.middle
+          )
+        else:
+          raise newException(ValueError, fmt"Unexpected idx: {idx}")
 
   let leftSize = tree.left.len
   let middleSize = tree.middle.len
@@ -429,6 +531,46 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
 
 
   # echo "picking: ", idx, " ", leftSize, " ", middleSize, " ", rightSize
+
+  if idx == 0 and not after:
+    if tree.left.len >= tree.middle.len and tree.left.len >= tree.right.len:
+      return TernaryTreeList[T](
+        kind: ternaryTreeBranch,
+        size: tree.size + 1,
+        depth: tree.depth + 1,
+        left: nil,
+        middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+        right: tree
+      )
+
+  if idx == tree.len - 1 and after:
+    if tree.right.len >= tree.middle.len and tree.right.len >= tree.left.len:
+      return TernaryTreeList[T](
+        kind: ternaryTreeBranch,
+        size: tree.size + 1,
+        depth: tree.depth + 1,
+        left: tree,
+        middle: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+        right: nil
+      )
+
+  if after and idx == tree.len - 1 and rightSize == 0 and middleSize >= leftSize:
+    return TernaryTreeList[T](
+      kind: ternaryTreeBranch, size: tree.size + 1,
+      depth: tree.depth,
+      left: tree.left,
+      middle: tree.middle,
+      right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
+    )
+
+  if not after and idx == 0 and leftSize == 0 and middleSize >= rightSize:
+    return TernaryTreeList[T](
+      kind: ternaryTreeBranch, size: tree.size + 1,
+      depth: tree.depth,
+      left: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item),
+      middle: tree.middle,
+      right: tree.right
+    )
 
   if idx <= leftSize - 1:
     let changedBranch = tree.left.insert(idx, item, after)
