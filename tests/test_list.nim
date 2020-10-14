@@ -64,25 +64,25 @@ test "list insertions":
 
   check data5.formatInline == "((1 _ 2) 3 (4 _ 5))"
 
-  check data5.insert(0, 10, false).formatInline == "(((10 1 _) _ 2) 3 (4 _ 5))"
-  check data5.insert(0, 10, true).formatInline  == "(((_ 1 10) _ 2) 3 (4 _ 5))"
-  check data5.insert(1, 10, false).formatInline == "((1 _ (10 2 _)) 3 (4 _ 5))"
-  check data5.insert(1, 10, true).formatInline  == "((1 _ (_ 2 10)) 3 (4 _ 5))"
-  check data5.insert(2, 10, false).formatInline == "((1 _ 2) (10 3 _) (4 _ 5))"
-  check data5.insert(2, 10, true).formatInline  == "((1 _ 2) (_ 3 10) (4 _ 5))"
-  check data5.insert(3, 10, false).formatInline == "((1 _ 2) 3 ((10 4 _) _ 5))"
-  check data5.insert(3, 10, true).formatInline  == "((1 _ 2) 3 ((_ 4 10) _ 5))"
-  check data5.insert(4, 10, false).formatInline == "((1 _ 2) 3 (4 _ (10 5 _)))"
-  check data5.insert(4, 10, true).formatInline  == "((1 _ 2) 3 (4 _ (_ 5 10)))"
+  check data5.insert(0, 10, false).formatInline == "(_ 10 ((1 _ 2) 3 (4 _ 5)))"
+  check data5.insert(0, 10, true).formatInline  == "((1 10 2) 3 (4 _ 5))"
+  check data5.insert(1, 10, false).formatInline == "((1 10 2) 3 (4 _ 5))"
+  check data5.insert(1, 10, true).formatInline  == "((1 2 10) 3 (4 _ 5))"
+  check data5.insert(2, 10, false).formatInline == "((1 _ 2) (_ 10 3) (4 _ 5))"
+  check data5.insert(2, 10, true).formatInline  == "((1 _ 2) (3 10 _) (4 _ 5))"
+  check data5.insert(3, 10, false).formatInline == "((1 _ 2) 3 (10 4 5))"
+  check data5.insert(3, 10, true).formatInline  == "((1 _ 2) 3 (4 10 5))"
+  check data5.insert(4, 10, false).formatInline == "((1 _ 2) 3 (4 10 5))"
+  check data5.insert(4, 10, true).formatInline  == "(((1 _ 2) 3 (4 _ 5)) 10 _)"
 
   let origin4 = @[1,2,3,4]
   let data4 = initTernaryTreeList(origin4)
 
-  check data4.assocBefore(3, 10).formatInline == "(1 (2 _ 3) (10 4 _))"
-  check data4.assocAfter(3, 10).formatInline == "(1 (2 _ 3) (_ 4 10))"
+  check data4.assocBefore(3, 10).formatInline == "(1 (2 _ 3) (_ 10 4))"
+  check data4.assocAfter(3, 10).formatInline == "(1 (2 _ 3) (4 10 _))"
 
-  check data4.prepend(10).formatInline == "((10 1 _) (2 _ 3) 4)"
-  check data4.append(10).formatInline == "(1 (2 _ 3) (_ 4 10))"
+  check data4.prepend(10).formatInline == "((_ 10 1) (2 _ 3) 4)"
+  check data4.append(10).formatInline == "(1 (2 _ 3) (4 10 _))"
 
   let origin2 = @[1,2]
   let data2 = initTernaryTreeList(origin2)
@@ -111,7 +111,7 @@ test "force balancing":
   for idx in 0..<20:
     data = data.append(idx, true)
   # echo data.formatInline
-  check data.formatInline == "(_ 0 (_ 1 (_ 2 (_ 3 (_ 4 (_ 5 (_ 6 (_ 7 (_ 8 (_ 9 (_ 10 (_ 11 (_ 12 (_ 13 (_ 14 (_ 15 (_ 16 (_ 17 (_ 18 19)))))))))))))))))))"
+  check data.formatInline == "(((0 1 2) (3 4 5) (6 7 8)) ((9 10 11) (12 13 14) (15 16 17)) (18 19 _))"
   data.forceInplaceBalancing
   check data.formatInline == "(((0 _ 1) (2 3 4) (5 _ 6)) ((7 _ 8) (9 _ 10) (11 _ 12)) ((13 _ 14) (15 16 17) (18 _ 19)))"
   # echo data.formatInline

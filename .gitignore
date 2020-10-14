@@ -3,5 +3,6 @@ tests/test_list
 tests/test_map
 tests/test_revision
 tests/costs
+tests/shape
 
 profile_results.txt
