@@ -427,6 +427,14 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
           middle: tree.middle,
           right: tree.right,
         )
+    elif tree.right.isNil:
+      return TernaryTreeMap[K, T](
+        kind: ternaryTreeBranch,
+        maxHash: tree.maxHash, minHash: thisHash,
+        left: createLeaf(key, item),
+        middle: tree.left,
+        right: tree.middle,
+      )
     else:
       return TernaryTreeMap[K, T](
         kind: ternaryTreeBranch,
@@ -454,6 +462,14 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
           middle: tree.middle,
           right: createLeaf(key, item),
         )
+    elif tree.left.isNil:
+      return TernaryTreeMap[K, T](
+        kind: ternaryTreeBranch,
+        maxHash: thisHash, minHash: tree.minHash,
+        left: tree.middle,
+        middle: tree.right,
+        right: createLeaf(key, item),
+      )
     else:
       return TernaryTreeMap[K, T](
         kind: ternaryTreeBranch,

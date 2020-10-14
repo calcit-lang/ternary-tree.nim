@@ -24,12 +24,14 @@ proc testList(): void =
 
 proc testMap(): void =
   var dict: Table[string, int]
-  for idx in 0..<100:
-    dict[fmt"{idx}"] = idx + 10
-
   var data10 = initTernaryTreeMap[string, int](dict)
-  for idx in 0..<10000:
+
+  for idx in 0..<n:
     data10 = data10.assoc(fmt"{idx}", idx + 10)
+
+  for y in 0..<40:
+    for idx in 0..<n:
+      discard data10[fmt"{idx}"]
 
   echo data10.getDepth
   data10.forceInplaceBalancing
@@ -38,8 +40,8 @@ proc testMap(): void =
 
 let t1 = now()
 
-# testMap()
-testList()
+testMap()
+# testList()
 
 let t2 = now()
 echo "Costs: ", t2 - t1

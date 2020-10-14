@@ -17,9 +17,10 @@ proc tryMapShape(): void =
   var dict: Table[string, int]
   var data = initTernaryTreeMap(dict)
 
-  for idx in 0..<30:
-    data = data.assoc(fmt"{idx}", idx + 10)
-    echo data.formatInline
+  for idx in 0..<20:
+    data = data.assoc(fmt"x{idx}", idx + 10)
+    echo data.formatInline()
+    # echo "checked: ", data.checkStructure()
 
 # tryListShape()
 
