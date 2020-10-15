@@ -50,6 +50,8 @@ data.assocAfter(2, 10)
 data.prepend(10)
 data.append(10)
 data.concat(data)
+data.indexOf(1)
+data.findIndex(proc(x: int): bool = x == 1)
 
 data == data
 data.identical(data) # compare by reference

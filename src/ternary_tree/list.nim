@@ -117,6 +117,50 @@ proc each*[T](tree: TernaryTreeList[T], f: proc(x: T): void): void =
     if not tree.right.isNil:
       tree.right.each(f)
 
+# returns -1 if not found
+proc findIndex*[T](tree: TernaryTreeList[T], f: proc(x: T): bool): int =
+  if tree.isNil:
+    return -1
+  case tree.kind:
+  of ternaryTreeLeaf:
+    if f(tree.value):
+      return 0
+    else:
+      return -1
+  of ternaryTreeBranch:
+    let tryLeft = tree.left.findIndex(f)
+    if tryLeft >= 0:
+      return tryLeft
+    let tryMiddle = tree.middle.findIndex(f)
+    if tryMiddle >= 0:
+      return tryMiddle + tree.left.len
+    let tryRight = tree.right.findIndex(f)
+    if tryRight >= 0:
+      return tryRight + tree.left.len + tree.middle.len
+    return -1
+
+# returns -1 if not found
+proc indexOf*[T](tree: TernaryTreeList[T], item: T): int =
+  if tree.isNil:
+    return -1
+  case tree.kind:
+  of ternaryTreeLeaf:
+    if item == tree.value:
+      return 0
+    else:
+      return -1
+  of ternaryTreeBranch:
+    let tryLeft = tree.left.indexOf(item)
+    if tryLeft >= 0:
+      return tryLeft
+    let tryMiddle = tree.middle.indexOf(item)
+    if tryMiddle >= 0:
+      return tryMiddle + tree.left.len
+    let tryRight = tree.right.indexOf(item)
+    if tryRight >= 0:
+      return tryRight + tree.left.len + tree.middle.len
+    return -1
+
 proc writeLeavesSeq*[T](tree: TernaryTreeList[T], acc: var seq[TernaryTreeList[T]], idx: RefInt): void =
   if tree.isNil:
     discard
