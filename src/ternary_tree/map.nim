@@ -127,10 +127,12 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): Ternar
   initTernaryTreeMap(leavesList)
 
 proc initTernaryTreeMap*[K, T](t: Table[K, T]): TernaryTreeMap[K, T] =
-  var xs: seq[TernaryTreeMapKeyValuePair[K, T]]
+  var xs = newSeq[TernaryTreeMapKeyValuePair[K, T]](t.len)
 
+  var idx = 0
   for k, v in t:
-    xs.add((k,v))
+    xs[idx] = (k,v)
+    idx = idx + 1
 
   let ys = xs.sorted(proc(x, y: TernaryTreeMapKeyValuePair[K, T]): int =
     let hx = x.k.hash
@@ -173,40 +175,46 @@ proc isEmpty*(tree: TernaryTreeMap): bool =
   of ternaryTreeBranch:
     tree.left.isNil and tree.middle.isNil and tree.right.isNil
 
-proc collectHashSortedSeq[K, T](tree: TernaryTreeMap[K, T], acc: var seq[TernaryTreeMapKeyValuePair[K, T]]): void =
+proc collectHashSortedSeq[K, T](tree: TernaryTreeMap[K, T], acc: var seq[TernaryTreeMapKeyValuePair[K, T]], idx: RefInt): void =
   if tree.isNil or tree.isEmpty:
     discard
   else:
     case tree.kind
     of ternaryTreeLeaf:
-      acc.add((tree.key, tree.value))
+      acc[idx[]] = (tree.key, tree.value)
+      idx[] = idx[] + 1
     of ternaryTreeBranch:
-      tree.left.collectHashSortedSeq(acc)
-      tree.middle.collectHashSortedSeq(acc)
-      tree.right.collectHashSortedSeq(acc)
+      tree.left.collectHashSortedSeq(acc, idx)
+      tree.middle.collectHashSortedSeq(acc, idx)
+      tree.right.collectHashSortedSeq(acc, idx)
 
 # sorted by hash(tree.key)
 proc toHashSortedSeq*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePair[K, T]] =
-  var acc: seq[TernaryTreeMapKeyValuePair[K, T]]
-  collectHashSortedSeq(tree, acc)
+  var acc = newSeq[TernaryTreeMapKeyValuePair[K, T]](tree.len)
+  var idx = new RefInt
+  idx[] = 0
+  collectHashSortedSeq(tree, acc, idx)
   return acc
 
-proc collectHashSortedSeqOfLeaf[K, T](tree: TernaryTreeMap[K, T], acc: var seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): void =
+proc collectHashSortedSeqOfLeaf[K, T](tree: TernaryTreeMap[K, T], acc: var seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]], idx: RefInt): void =
   if tree.isNil or tree.isEmpty:
     discard
   else:
     case tree.kind
     of ternaryTreeLeaf:
-      acc.add((tree.key, tree))
+      acc[idx[]] = (tree.key, tree)
+      idx[] = idx[] + 1
     of ternaryTreeBranch:
-      tree.left.collectHashSortedSeqOfLeaf(acc)
-      tree.middle.collectHashSortedSeqOfLeaf(acc)
-      tree.right.collectHashSortedSeqOfLeaf(acc)
+      tree.left.collectHashSortedSeqOfLeaf(acc, idx)
+      tree.middle.collectHashSortedSeqOfLeaf(acc, idx)
+      tree.right.collectHashSortedSeqOfLeaf(acc, idx)
 
 # for reusing leaves during rebalancing
 proc toHashSortedSeqOfLeaves*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]] =
-  var acc: seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]
-  collectHashSortedSeqOfLeaf(tree, acc)
+  var acc = newSeq[TernaryTreeMapKeyValuePairOfLeaf[K, T]](tree.len)
+  let idx = new RefInt
+  idx[] = 0
+  collectHashSortedSeqOfLeaf(tree, acc, idx)
   return acc
 
 proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
