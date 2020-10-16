@@ -171,3 +171,10 @@ test "list each":
     discard
   )
   check i == 10
+
+test "index of":
+  let data = initTernaryTreeList[int](@[1,2,3,4,5,6,7,8])
+  check data.indexOf(2) == 1
+  check data.findIndex(proc(x:int):bool = x == 2) == 1
+  check data.indexOf(9) == -1
+  check data.findIndex(proc(x:int):bool = x == 9) == -1
