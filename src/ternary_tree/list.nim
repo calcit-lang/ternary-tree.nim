@@ -28,13 +28,13 @@ proc initTernaryTreeList*[T](size: int, offset: int, xs: var seq[TernaryTreeList
     of 0:
       TernaryTreeList[T](kind: ternaryTreeBranch, size: 0, depth: 1)
     of 1:
-      xs[offset + 0]
+      xs[offset]
     of 2:
-      let left = xs[offset + 0]
+      let left = xs[offset]
       let right = xs[offset + 1]
       TernaryTreeList[T](kind: ternaryTreeBranch, size: 2, left: left, right: right, depth: 2)
     of 3:
-      let left = xs[offset + 0]
+      let left = xs[offset]
       let middle = xs[offset + 1]
       let right = xs[offset + 2]
       TernaryTreeList[T](kind: ternaryTreeBranch, size: 3, left: left, middle: middle, right: right, depth: 2)

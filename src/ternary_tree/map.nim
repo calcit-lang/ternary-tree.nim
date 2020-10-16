@@ -65,9 +65,7 @@ proc createLeaf[K, T](item: TernaryTreeMapKeyValuePair[K, T]): TernaryTreeMap[K,
 
 # this proc is not exported, pick up next proc as the entry.
 # pairs must be sorted before passing to proc.
-proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): TernaryTreeMap[K, T] =
-  let size = xs.len
-
+proc initTernaryTreeMap[K, T](size: int, offset: int, xs: var seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): TernaryTreeMap[K, T] =
   case size
   of 0:
     TernaryTreeMap[K, T](
@@ -75,7 +73,7 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): 
       left: nil, middle: nil, right: nil
     )
   of 1:
-    let middlePair = xs[0]
+    let middlePair = xs[offset]
     let hashVal = middlePair.k.hash
     TernaryTreeMap[K, T](
       kind: ternaryTreeBranch, maxHash: hashVal, minHash: hashVal,
@@ -83,8 +81,8 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): 
       middle: middlePair.v
     )
   of 2:
-    let leftPair = xs[0]
-    let rightPair = xs[1]
+    let leftPair = xs[offset]
+    let rightPair = xs[offset + 1]
     TernaryTreeMap[K, T](
       kind: ternaryTreeBranch,
       maxHash: rightPair.k.hash,
@@ -94,9 +92,9 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): 
       right:  rightPair.v,
     )
   of 3:
-    let leftPair = xs[0]
-    let middlePair = xs[1]
-    let rightPair = xs[2]
+    let leftPair = xs[offset]
+    let middlePair = xs[offset + 1]
+    let rightPair = xs[offset + 2]
     TernaryTreeMap[K, T](
       kind: ternaryTreeBranch,
       maxHash: rightPair.k.hash,
@@ -108,9 +106,9 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): 
   else:
     let divided = divideTernarySizes(size)
 
-    let left = initTernaryTreeMap(xs[0..<divided.left])
-    let middle = initTernaryTreeMap(xs[divided.left..<(divided.left + divided.middle)])
-    let right = initTernaryTreeMap(xs[(divided.left + divided.middle)..^1])
+    let left = initTernaryTreeMap(divided.left, offset, xs)
+    let middle = initTernaryTreeMap(divided.middle, offset + divided.left, xs)
+    let right = initTernaryTreeMap(divided.right, offset + divided.left + divided.middle,  xs)
 
     TernaryTreeMap[K, T](
       kind: ternaryTreeBranch,
@@ -120,11 +118,11 @@ proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePairOfLeaf[K, T]]): 
     )
 
 proc initTernaryTreeMap[K, T](xs: seq[TernaryTreeMapKeyValuePair[K, T]]): TernaryTreeMap[K, T] =
-  let leavesList = xs.map(
+  var leavesList = xs.map(
     proc(pair: TernaryTreeMapKeyValuePair[K, T]): TernaryTreeMapKeyValuePairOfLeaf[K, T] =
       return (pair.k, createLeaf[K, T](pair))
   )
-  initTernaryTreeMap(leavesList)
+  initTernaryTreeMap(leavesList.len, 0, leavesList)
 
 proc initTernaryTreeMap*[K, T](t: Table[K, T]): TernaryTreeMap[K, T] =
   var xs = newSeq[TernaryTreeMapKeyValuePair[K, T]](t.len)
@@ -337,7 +335,7 @@ proc rangeContainsHash*[K, T](tree: TernaryTreeMap[K, T], thisHash: Hash): bool 
   elif tree.kind == ternaryTreeLeaf:
     tree.hash == thisHash
   else:
-    thisHash >= tree.getMin and thisHash <= tree.getMax
+    thisHash >= tree.minHash and thisHash <= tree.maxHash
 
 proc assocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMap[K, T] =
   if tree.isNil or tree.isEmpty:
@@ -729,8 +727,8 @@ proc merge*[K, T](xs: TernaryTreeMap[K, T], ys: TernaryTreeMap[K, T]): TernaryTr
 # this function mutates original tree to make it more balanced
 proc forceInplaceBalancing*[K,T](tree: TernaryTreeMap[K,T]): void =
   # echo "Force inplace balancing of list"
-  let xs = tree.toHashSortedSeqOfLeaves
-  let newTree = initTernaryTreeMap(xs)
+  var xs = tree.toHashSortedSeqOfLeaves
+  let newTree = initTernaryTreeMap(xs.len, 0, xs)
   tree.left = newTree.left
   tree.middle = newTree.middle
   tree.right = newTree.right
