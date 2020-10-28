@@ -216,9 +216,9 @@ proc loopGet*[T](originalTree: TernaryTreeList[T], originalIdx: int): T =
     if idx > (tree.size - 1):
       raise newException(ValueError, "Index too large")
 
-    let leftSize = tree.left.len
-    let middleSize = tree.middle.len
-    let rightSize = tree.right.len
+    let leftSize = if tree.left.isNil: 0 else: tree.left.size
+    let middleSize = if tree.middle.isNil: 0 else: tree.middle.size
+    let rightSize = if tree.right.isNil: 0 else: tree.right.size
 
     if leftSize + middleSize + rightSize != tree.size:
       raise newException(ValueError, "tree.size does not match sum of branch sizes")
