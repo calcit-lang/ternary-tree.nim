@@ -830,7 +830,7 @@ proc reverse*[T](tree: TernaryTreeList[T]): TernaryTreeList[T] =
 
   case tree.kind
   of ternaryTreeLeaf:
-    tree
+    return tree
   of ternaryTreeBranch:
     return TernaryTreeList[T](
       kind: ternaryTreeBranch, size: tree.size,
