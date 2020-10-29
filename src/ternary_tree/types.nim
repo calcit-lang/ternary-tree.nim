@@ -30,7 +30,7 @@ type
       right*: TernaryTreeMap[K, T]
     of ternaryTreeLeaf:
       hash*: int
-      pairs*: seq[TernaryTreeMapKeyValuePair[K, T]]
+      elements*: seq[TernaryTreeMapKeyValuePair[K, T]] # handle hash collapsing
 
   TernaryTreeRevision*[T] = ref object
     case kind*: TernaryTreeKind
