@@ -53,9 +53,9 @@ proc testMapMerge(): void =
 
 let t1 = now()
 
-# testMap()
+testMap()
 # testList()
-testMapMerge()
+# testMapMerge()
 
 let t2 = now()
 echo "Costs: ", t2 - t1

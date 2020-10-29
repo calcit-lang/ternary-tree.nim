@@ -15,6 +15,10 @@ type
     of ternaryTreeLeaf:
       value*: T
 
+  TernaryTreeMapKeyValuePair*[K, V] = tuple
+    k: K
+    v: V
+
   TernaryTreeMap*[K, T] = ref object
     case kind*: TernaryTreeKind
     of ternaryTreeBranch:
@@ -26,8 +30,7 @@ type
       right*: TernaryTreeMap[K, T]
     of ternaryTreeLeaf:
       hash*: int
-      key*: K
-      value*: T
+      pairs*: seq[TernaryTreeMapKeyValuePair[K, T]]
 
   TernaryTreeRevision*[T] = ref object
     case kind*: TernaryTreeKind
