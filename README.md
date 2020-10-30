@@ -24,7 +24,7 @@ Compact tree representatin of map:
 Add in nimble file:
 
 ```nim
-requires "https://github.com/Cirru/ternary-tree#v0.1.9"
+requires "https://github.com/Cirru/ternary-tree#v0.1.27"
 ```
 
 * List
