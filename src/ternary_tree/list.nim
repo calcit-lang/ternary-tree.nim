@@ -670,6 +670,7 @@ proc forceInplaceBalancing*[T](tree: TernaryTreeList[T]): void =
   tree.left = newTree.left
   tree.middle = newTree.middle
   tree.right = newTree.right
+  tree.depth = decideParentDepth(tree.left, tree.middle, tree.right)
 
 # TODO, need better strategy for detecting
 proc maybeReblance[T](tree: TernaryTreeList[T]): void =
@@ -794,6 +795,9 @@ proc slice*[T](tree: TernaryTreeList[T], startIdx: int, endIdx: int): TernaryTre
       return tree
     else:
       raise newException(ValueError, fmt"Invalid slice range for a leaf: {startIdx} {endIdx}")
+
+  if startIdx == 0 and endIdx == tree.len:
+    return tree
 
   let leftSize = tree.left.len
   let middleSize = tree.middle.len
