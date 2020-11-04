@@ -4,6 +4,8 @@ Ternary Tree
 
 > Structural sharing data structure of lists and maps.
 
+Intro [ternary-tree: structure sharing data for learning purpose](https://clojureverse.org/t/ternary-tree-structure-sharing-data-for-learning-purpose/6760).
+
 If you know Clojure, then you know what I want to build.
 However ternary tree may have issues in performance and memory size(see the holes below). So this project is experimental.
 
@@ -24,7 +26,7 @@ Compact tree representatin of map:
 Add in nimble file:
 
 ```nim
-requires "https://github.com/Cirru/ternary-tree#v0.1.27"
+requires "ternary_tree >= 0.1.27"
 ```
 
 * List
