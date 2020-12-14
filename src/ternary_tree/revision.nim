@@ -44,7 +44,7 @@ proc stringToSeqPath*(text: string): seq[PickBranch] =
   for x in text:
     let idx = shortChartMap.find(x)
     if idx < 0 or idx >= 27:
-      raise newException(ValueError, fmt"char out of range {x}")
+      raise newException(TernaryTreeError, fmt"char out of range {x}")
     let a3 = idx.mod(3)
     let b3 = ((idx - a3) / 3).int
     let a2 = b3.mod(3)
@@ -59,7 +59,7 @@ proc stringToSeqPath*(text: string): seq[PickBranch] =
       of 2:
         result.add pickRight
       else:
-        raise newException(ValueError, fmt"unexpected mod result ${y}")
+        raise newException(TernaryTreeError, fmt"unexpected mod result ${y}")
   if result[^1] == pickMiddle:
     result = result[0..^2]
     if result[^1] == pickMiddle:
@@ -99,7 +99,7 @@ proc get*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch]): Option[T] =
     if path.len == 0:
       return some(tree.value)
     else:
-      # raise newException(ValueError, fmt"missing branch for path {path}")
+      # raise newException(TernaryTreeError, fmt"missing branch for path {path}")
       return none(T)
   of ternaryTreeBranch:
     if path.len == 0:
@@ -170,13 +170,13 @@ proc assoc*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch], item: T): Te
     if path.len == 0:
       return TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: item)
 
-    raise newException(ValueError, fmt"no target for assoc at {path}")
+    raise newException(TernaryTreeError, fmt"no target for assoc at {path}")
 
   case tree.kind
   of ternaryTreeLeaf:
     if path.len == 0:
       return TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: item)
-    raise newException(ValueError, fmt"no target for assoc at {path}")
+    raise newException(TernaryTreeError, fmt"no target for assoc at {path}")
 
   of ternaryTreeBranch:
     if path.len == 0:
@@ -291,13 +291,13 @@ proc dissoc*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch]): TernaryTre
     if path.len == 0:
       return nil
     else:
-      raise newException(ValueError, fmt"no target to dissoc for ${path}")
+      raise newException(TernaryTreeError, fmt"no target to dissoc for ${path}")
   case tree.kind
   of ternaryTreeLeaf:
     if path.len == 0:
       return nil
     else:
-      raise newException(ValueError, fmt"no target to dissoc for ${path}")
+      raise newException(TernaryTreeError, fmt"no target to dissoc for ${path}")
   of ternaryTreeBranch:
     if path.len == 0:
       return nil
@@ -331,7 +331,7 @@ proc dissoc*[T](tree: TernaryTreeRevision[T], path: string): TernaryTreeRevision
 
 proc assocAside*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch], item: T, aside: PickBranch): TernaryTreeRevision[T] =
   if tree.isNil:
-    raise newException(ValueError, fmt"target nil is bad for assoc aside at {path}")
+    raise newException(TernaryTreeError, fmt"target nil is bad for assoc aside at {path}")
 
   case tree.kind
   of ternaryTreeLeaf:
@@ -352,14 +352,14 @@ proc assocAside*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch], item: T
           right: TernaryTreeRevision[T](kind: ternaryTreeLeaf, value: item)
         )
       else:
-        raise newException(ValueError, fmt"invalid aside pickMiddle")
-    raise newException(ValueError, fmt"no target for assoc at {path}")
+        raise newException(TernaryTreeError, fmt"invalid aside pickMiddle")
+    raise newException(TernaryTreeError, fmt"no target for assoc at {path}")
 
 
   of ternaryTreeBranch:
     if path.len == 0:
       if tree.isEmpty:
-        raise newException(ValueError, fmt"no target for assoc at {path}")
+        raise newException(TernaryTreeError, fmt"no target for assoc at {path}")
       else:
         return TernaryTreeRevision[T](
           kind: ternaryTreeBranch,

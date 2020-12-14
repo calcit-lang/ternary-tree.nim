@@ -45,3 +45,5 @@ type
     pickLeft, pickMiddle, pickRight
 
   RefInt* = ref int
+
+type TernaryTreeError* = object of ValueError

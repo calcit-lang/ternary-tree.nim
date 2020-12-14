@@ -205,23 +205,23 @@ proc loopGet*[T](originalTree: TernaryTreeList[T], originalIdx: int): T =
   var idx = originalIdx
   while tree.isNil.not:
     if idx < 0:
-      raise newException(ValueError, "Cannot index negative number")
+      raise newException(TernaryTreeError, "Cannot index negative number")
 
     if tree.kind == ternaryTreeLeaf:
       if idx == 0:
         return tree.value
       else:
-        raise newException(ValueError, fmt"Cannot get from leaf with index {idx}")
+        raise newException(TernaryTreeError, fmt"Cannot get from leaf with index {idx}")
 
     if idx > (tree.size - 1):
-      raise newException(ValueError, "Index too large")
+      raise newException(TernaryTreeError, "Index too large")
 
     let leftSize = if tree.left.isNil: 0 else: tree.left.size
     let middleSize = if tree.middle.isNil: 0 else: tree.middle.size
     let rightSize = if tree.right.isNil: 0 else: tree.right.size
 
     if leftSize + middleSize + rightSize != tree.size:
-      raise newException(ValueError, "tree.size does not match sum of branch sizes")
+      raise newException(TernaryTreeError, "tree.size does not match sum of branch sizes")
 
     if idx <= leftSize - 1:
       tree = tree.left
@@ -232,7 +232,7 @@ proc loopGet*[T](originalTree: TernaryTreeList[T], originalIdx: int): T =
       tree = tree.right
       idx = idx - leftSize - middleSize
 
-  raise newException(ValueError, fmt"Failed to get {idx}")
+  raise newException(TernaryTreeError, fmt"Failed to get {idx}")
 
 proc `[]`*[T](tree: TernaryTreeList[T], idx: int): T =
   tree.loopGet(idx)
@@ -241,32 +241,32 @@ proc first*[T](tree: TernaryTreeList[T]): T =
   if tree.len > 0:
     tree.loopGet(0)
   else:
-    raise newException(ValueError, "Cannot get from empty list")
+    raise newException(TernaryTreeError, "Cannot get from empty list")
 
 proc last*[T](tree: TernaryTreeList[T]): T =
   if tree.len > 0:
     tree.loopGet(tree.len - 1)
   else:
-    raise newException(ValueError, "Cannot get from empty list")
+    raise newException(TernaryTreeError, "Cannot get from empty list")
 
 proc assoc*[T](tree: TernaryTreeList[T], idx: int, item: T): TernaryTreeList[T] =
   if idx < 0:
-    raise newException(ValueError, "Cannot index negative number")
+    raise newException(TernaryTreeError, "Cannot index negative number")
   if idx > (tree.size - 1):
-    raise newException(ValueError, "Index too large")
+    raise newException(TernaryTreeError, "Index too large")
 
   if tree.kind == ternaryTreeLeaf:
     if idx == 0:
       return TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
     else:
-      raise newException(ValueError, fmt"Cannot get from leaf with index {idx}")
+      raise newException(TernaryTreeError, fmt"Cannot get from leaf with index {idx}")
 
   let leftSize = tree.left.len
   let middleSize = tree.middle.len
   let rightSize = tree.right.len
 
   if leftSize + middleSize + rightSize != tree.size:
-    raise newException(ValueError, "tree.size does not match sum of branch sizes")
+    raise newException(TernaryTreeError, "tree.size does not match sum of branch sizes")
 
   if idx <= leftSize - 1:
     let changedBranch = tree.left.assoc(idx, item)
@@ -298,16 +298,16 @@ proc assoc*[T](tree: TernaryTreeList[T], idx: int, item: T): TernaryTreeList[T] 
 
 proc dissoc*[T](tree: TernaryTreeList[T], idx: int): TernaryTreeList[T] =
   if tree.isNil:
-    raise newException(ValueError, "dissoc does not work on nil")
+    raise newException(TernaryTreeError, "dissoc does not work on nil")
 
   if idx < 0:
-    raise newException(ValueError, fmt"Index is negative {idx}")
+    raise newException(TernaryTreeError, fmt"Index is negative {idx}")
 
   if tree.len == 0:
-    raise newException(ValueError, "Cannot remove from empty list")
+    raise newException(TernaryTreeError, "Cannot remove from empty list")
 
   if idx > tree.len - 1:
-    raise newException(ValueError, fmt"Index too large {idx}")
+    raise newException(TernaryTreeError, fmt"Index too large {idx}")
 
   if tree.len == 1:
     return TernaryTreeList[T](
@@ -319,14 +319,14 @@ proc dissoc*[T](tree: TernaryTreeList[T], idx: int): TernaryTreeList[T] =
     )
 
   if tree.kind == ternaryTreeLeaf:
-    raise newException(ValueError, "dissoc should be handled at branches")
+    raise newException(TernaryTreeError, "dissoc should be handled at branches")
 
   let leftSize = tree.left.len
   let middleSize = tree.middle.len
   let rightSize = tree.right.len
 
   if leftSize + middleSize + rightSize != tree.size:
-    raise newException(ValueError, "tree.size does not match sum of branch sizes")
+    raise newException(TernaryTreeError, "tree.size does not match sum of branch sizes")
 
   if idx <= leftSize - 1:
     var changedBranch = tree.left.dissoc(idx)
@@ -369,25 +369,25 @@ proc dissoc*[T](tree: TernaryTreeList[T], idx: int): TernaryTreeList[T] =
 
 proc rest*[T](tree: TernaryTreeList[T]): TernaryTreeList[T] =
   if tree.isNil:
-    raise newException(ValueError, "Cannot call rest on nil")
+    raise newException(TernaryTreeError, "Cannot call rest on nil")
   if tree.len < 1:
-    raise newException(ValueError, "Cannot call rest on empty list")
+    raise newException(TernaryTreeError, "Cannot call rest on empty list")
 
   tree.dissoc(0)
 
 proc butlast*[T](tree: TernaryTreeList[T]): TernaryTreeList[T] =
   if tree.isNil:
-    raise newException(ValueError, "Cannot call butlast on nil")
+    raise newException(TernaryTreeError, "Cannot call butlast on nil")
   if tree.len < 1:
-    raise newException(ValueError, "Cannot call butlast on empty list")
+    raise newException(TernaryTreeError, "Cannot call butlast on empty list")
 
   tree.dissoc(tree.len - 1)
 
 proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false): TernaryTreeList[T] =
   if tree.isNil:
-    raise newException(ValueError, "Cannot insert into nil")
+    raise newException(TernaryTreeError, "Cannot insert into nil")
   if tree.len == 0:
-    raise newException(ValueError, "Empty node is not a correct position for inserting")
+    raise newException(TernaryTreeError, "Empty node is not a correct position for inserting")
 
   if tree.kind == ternaryTreeLeaf:
     if after:
@@ -499,7 +499,7 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
             right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
           )
         else:
-          raise newException(ValueError, fmt"Unexpected idx: {idx}")
+          raise newException(TernaryTreeError, fmt"Unexpected idx: {idx}")
       else:
         if idx == 0:
           return TernaryTreeList[T](
@@ -520,7 +520,7 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
             right: TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: item)
           )
         else:
-          raise newException(ValueError, fmt"Unexpected idx: {idx}")
+          raise newException(TernaryTreeError, fmt"Unexpected idx: {idx}")
     else:
       if tree.left.isNil:
         return TernaryTreeList[T](
@@ -551,7 +551,7 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
             right: tree.right
           )
         else:
-          raise newException(ValueError, fmt"Unexpected idx: {idx}")
+          raise newException(TernaryTreeError, fmt"Unexpected idx: {idx}")
       else:
         if idx == 0:
           return TernaryTreeList[T](
@@ -572,14 +572,14 @@ proc insert*[T](tree: TernaryTreeList[T], idx: int, item: T, after: bool = false
             right: tree.middle
           )
         else:
-          raise newException(ValueError, fmt"Unexpected idx: {idx}")
+          raise newException(TernaryTreeError, fmt"Unexpected idx: {idx}")
 
   let leftSize = tree.left.len
   let middleSize = tree.middle.len
   let rightSize = tree.right.len
 
   if leftSize + middleSize + rightSize != tree.size:
-    raise newException(ValueError, "tree.size does not match sum of branch sizes")
+    raise newException(TernaryTreeError, "tree.size does not match sum of branch sizes")
 
 
   # echo "picking: ", idx, " ", leftSize, " ", middleSize, " ", rightSize
@@ -763,14 +763,14 @@ proc checkStructure*[T](tree: TernaryTreeList[T]): bool =
   case tree.kind
   of ternaryTreeLeaf:
     if tree.size != 1:
-      raise newException(ValueError, fmt"Bad size at node {tree.formatInline}")
+      raise newException(TernaryTreeError, fmt"Bad size at node {tree.formatInline}")
   of ternaryTreeBranch:
     if tree.size != tree.left.len + tree.middle.len + tree.right.len:
-      raise newException(ValueError, fmt"Bad size at branch {tree.formatInline}")
+      raise newException(TernaryTreeError, fmt"Bad size at branch {tree.formatInline}")
 
     if tree.depth != decideParentDepth(tree.left, tree.middle, tree.right):
       let x = decideParentDepth(tree.left, tree.middle, tree.right)
-      raise newException(ValueError, fmt"Bad depth at branch {tree.formatInline}")
+      raise newException(TernaryTreeError, fmt"Bad depth at branch {tree.formatInline}")
 
     discard tree.left.checkStructure
     discard tree.middle.checkStructure
@@ -782,11 +782,11 @@ proc checkStructure*[T](tree: TernaryTreeList[T]): bool =
 proc slice*[T](tree: TernaryTreeList[T], startIdx: int, endIdx: int): TernaryTreeList[T] =
   # echo fmt"slice {tree.formatInline}: {startIdx}..{endIdx}"
   if endIdx > tree.len:
-    raise newException(ValueError, fmt"Slice range too large {endIdx} for {tree}")
+    raise newException(TernaryTreeError, fmt"Slice range too large {endIdx} for {tree}")
   if startIdx < 0:
-    raise newException(ValueError, fmt"Slice range too small {startIdx} for {tree}")
+    raise newException(TernaryTreeError, fmt"Slice range too small {startIdx} for {tree}")
   if startIdx > endIdx:
-    raise newException(ValueError, fmt"Invalid slice range {startIdx}..{endIdx} for {tree}")
+    raise newException(TernaryTreeError, fmt"Invalid slice range {startIdx}..{endIdx} for {tree}")
   if startIdx == endIdx:
     return TernaryTreeList[T](kind: ternaryTreeBranch, size: 0, depth: 0)
 
@@ -794,7 +794,7 @@ proc slice*[T](tree: TernaryTreeList[T], startIdx: int, endIdx: int): TernaryTre
     if startIdx == 0 and endIdx == 1:
       return tree
     else:
-      raise newException(ValueError, fmt"Invalid slice range for a leaf: {startIdx} {endIdx}")
+      raise newException(TernaryTreeError, fmt"Invalid slice range for a leaf: {startIdx} {endIdx}")
 
   if startIdx == 0 and endIdx == tree.len:
     return tree

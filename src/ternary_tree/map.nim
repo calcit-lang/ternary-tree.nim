@@ -21,7 +21,7 @@ proc isBranch(tree: TernaryTreeMap): bool =
 
 proc getMax(tree: TernaryTreeMap): int =
   if tree.isNil:
-    raise newException(ValueError, "Cannot find max hash of nil")
+    raise newException(TernaryTreeError, "Cannot find max hash of nil")
   case tree.kind
   of ternaryTreeLeaf:
     tree.hash
@@ -30,7 +30,7 @@ proc getMax(tree: TernaryTreeMap): int =
 
 proc getMin(tree: TernaryTreeMap): int =
   if tree.isNil:
-    raise newException(ValueError, "Cannot find min hash of nil")
+    raise newException(TernaryTreeError, "Cannot find min hash of nil")
   case tree.kind
   of ternaryTreeLeaf:
     tree.hash
@@ -313,24 +313,24 @@ proc checkStructure*(tree: TernaryTreeMap): bool =
   if tree.kind == ternaryTreeLeaf:
     for pair in tree.elements:
       if tree.hash != pair.k.hash:
-        raise newException(ValueError, fmt"Bad hash at leaf node {tree}")
+        raise newException(TernaryTreeError, fmt"Bad hash at leaf node {tree}")
 
     if tree.len != 1:
-      raise newException(ValueError, fmt"Bad len at leaf node {tree}")
+      raise newException(TernaryTreeError, fmt"Bad len at leaf node {tree}")
 
   else:
     if not tree.left.isNil and not tree.middle.isNil:
       if tree.left.getMax >= tree.middle.getMin:
-        raise newException(ValueError, fmt"Wrong hash order at left/middle branches {tree.formatInline(true)}")
+        raise newException(TernaryTreeError, fmt"Wrong hash order at left/middle branches {tree.formatInline(true)}")
 
     if not tree.left.isNil and not tree.right.isNil:
       if tree.left.getMax >= tree.right.getMin:
         echo tree.left.getMax, " ", tree.right.getMin
-        raise newException(ValueError, fmt"Wrong hash order at left/right branches {tree.formatInline(true)}")
+        raise newException(TernaryTreeError, fmt"Wrong hash order at left/right branches {tree.formatInline(true)}")
 
     if not tree.middle.isNil and not tree.right.isNil:
       if tree.middle.getMax >= tree.right.getMin:
-        raise newException(ValueError, fmt"Wrong hash order at middle/right branches {tree.formatInline(true)}")
+        raise newException(TernaryTreeError, fmt"Wrong hash order at middle/right branches {tree.formatInline(true)}")
 
     if not tree.left.isNil:
       discard tree.left.checkStructure
@@ -351,7 +351,7 @@ proc rangeContainsHash*[K, T](tree: TernaryTreeMap[K, T], thisHash: Hash): bool 
 
 proc assocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMap[K, T] =
   if tree.isNil or tree.isEmpty:
-    raise newException(ValueError, "Cannot call assoc on nil")
+    raise newException(TernaryTreeError, "Cannot call assoc on nil")
 
   let thisHash = key.hash
 
@@ -367,13 +367,13 @@ proc assocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTr
     if replaced:
       return TernaryTreeMap[K, T](kind: ternaryTreeLeaf, hash: thisHash, elements: newPairs)
     else:
-      raise newException(ValueError, "Unexpected missing hash in assoc, invalid branch")
+      raise newException(TernaryTreeError, "Unexpected missing hash in assoc, invalid branch")
 
   if thisHash < tree.minHash:
-    raise newException(ValueError, "Unexpected missing hash in assoc, hash too small")
+    raise newException(TernaryTreeError, "Unexpected missing hash in assoc, hash too small")
 
   elif thisHash > tree.maxHash:
-    raise newException(ValueError, "Unexpected missing hash in assoc, hash too large")
+    raise newException(TernaryTreeError, "Unexpected missing hash in assoc, hash too large")
 
   if not tree.left.isNil:
     if tree.left.rangeContainsHash(thisHash):
@@ -408,7 +408,7 @@ proc assocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTr
         right: tree.right.assocExisted(key, item)
       )
   else:
-    raise newException(ValueError, "Unexpected missing hash in assoc, found not branch")
+    raise newException(TernaryTreeError, "Unexpected missing hash in assoc, found not branch")
 
 proc isSome*[K, T](tree: TernaryTreeMap[K, T]): bool =
   if tree.isNil:
@@ -427,7 +427,7 @@ proc assocNew*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T): TernaryTreeMa
     if thisHash == tree.hash:
       for pair in tree.elements:
         if pair.k == key:
-          raise newException(ValueError, "Unexpected existed key in assoc")
+          raise newException(TernaryTreeError, "Unexpected existed key in assoc")
       var newPairs = newSeq[TernaryTreeMapKeyValuePair[K, T]](tree.elements.len + 1)
       for idx, pair in tree.elements:
         newPairs[idx] = pair
@@ -587,7 +587,7 @@ proc assoc*[K, T](tree: TernaryTreeMap[K, T], key: K, item: T, disableBalancing:
 
 proc dissocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K, T] =
   if tree.isNil:
-    raise newException(ValueError, "Unexpected missing key in dissoc")
+    raise newException(TernaryTreeError, "Unexpected missing key in dissoc")
 
   if tree.kind == ternaryTreeLeaf:
     if tree.hash == key.hash:
@@ -601,11 +601,11 @@ proc dissocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K,
         return nil
 
     else:
-      raise newException(ValueError, "Unexpected missing key in dissoc on leaf")
+      raise newException(TernaryTreeError, "Unexpected missing key in dissoc on leaf")
 
   if tree.len == 1:
     if not tree.contains(key):
-      raise newException(ValueError, "Unexpected missing key in dissoc single branch")
+      raise newException(TernaryTreeError, "Unexpected missing key in dissoc single branch")
     return nil
 
   let thisHash = key.hash
@@ -661,7 +661,7 @@ proc dissocExisted*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K,
       right: changedBranch
     )
 
-  raise newException(ValueError, "Cannot find branch in dissoc")
+  raise newException(TernaryTreeError, "Cannot find branch in dissoc")
 
 
 proc dissoc*[K, T](tree: TernaryTreeMap[K, T], key: K): TernaryTreeMap[K, T] =
