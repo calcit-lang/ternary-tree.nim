@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.1.28"
+version       = "0.1.29"
 author        = "jiyinyiyong"
 description   = "Ternary tree of list data structure"
 license       = "MIT"

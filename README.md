@@ -78,6 +78,7 @@ data.keys()
 data.assoc("1", 10)
 data.dissoc("1")
 data.merge(data)
+data.mergeSkip(data, v) # skip a value, mostly for nil
 
 data == data
 data.identical(data) # compare by reference

@@ -56,6 +56,9 @@ proc initTernaryTreeList*[T](xs: seq[T]): TernaryTreeList[T] =
     ys[idx] = TernaryTreeList[T](kind: ternaryTreeLeaf, size: 1, value: x)
   initTernaryTreeList(xs.len, 0, ys)
 
+proc initTernaryTreeList*[T](): TernaryTreeList[T] =
+  TernaryTreeList[T](kind: ternaryTreeBranch, size: 0, depth: 1)
+
 proc `$`*(tree: TernaryTreeList): string =
   fmt"TernaryTreeList[{tree.size}, ...]"
 

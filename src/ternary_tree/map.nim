@@ -137,6 +137,14 @@ proc initTernaryTreeMap*[K, T](t: Table[K, T]): TernaryTreeMap[K, T] =
 
   initTernaryTreeMap(ys)
 
+# for empty map
+proc initTernaryTreeMap*[K, T](): TernaryTreeMap[K, T] =
+  TernaryTreeMap[K, T](
+    kind: ternaryTreeBranch, maxHash: 0, minHash: 0,
+    left: nil, middle: nil, right: nil
+  )
+
+
 proc `$`*(tree: TernaryTreeMap): string =
   fmt"TernaryTreeMap[{tree.len}, ...]"
 
@@ -746,15 +754,32 @@ proc `==`*[K,V](xs: TernaryTreeMap[K, V], ys: TernaryTreeMap[K, V]): bool =
 
 proc merge*[K, T](xs: TernaryTreeMap[K, T], ys: TernaryTreeMap[K, T]): TernaryTreeMap[K, T] =
   var ret = xs
-  var acc = 0
+  var counted = 0
   ys.each(proc(key: K, item: T): void =
     ret = ret.assoc(key, item)
     # TODO pickd loop by experience
-    if acc > 700:
+    if counted > 700:
       ret.forceInplaceBalancing()
-      acc = 0
+      counted = 0
     else:
-      acc = acc + 1
+      counted = counted + 1
+  )
+  return ret
+
+# skip a value, mostly for nil
+proc mergeSkip*[K, T](xs: TernaryTreeMap[K, T], ys: TernaryTreeMap[K, T], skipped: T): TernaryTreeMap[K, T] =
+  var ret = xs
+  var counted = 0
+  ys.each(proc(key: K, item: T): void =
+    if item == skipped:
+      return
+    ret = ret.assoc(key, item)
+    # TODO pickd loop by experience
+    if counted > 700:
+      ret.forceInplaceBalancing()
+      counted = 0
+    else:
+      counted = counted + 1
   )
   return ret
 
