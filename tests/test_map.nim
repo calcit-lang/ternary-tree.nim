@@ -36,6 +36,9 @@ test "init map":
   check data10["1"] == some(11)
   check data10["11"] == none(int)
 
+  var emptyData: Table[string, int]
+  check initTernaryTreeMap[string, int]() == initTernaryTreeMap(emptyData)
+
 test "check structure":
   var dict: Table[string, int]
   for idx in 0..<100:
@@ -131,6 +134,23 @@ test "Merge":
   let both = initTernaryTreeMap(dictBoth)
 
   check (merged == both)
+
+test "Merge skip":
+  var dict: Table[string, int]
+  for idx in 0..<4:
+    dict[fmt"{idx}"] = idx + 10
+  let a = initTernaryTreeMap(dict)
+
+  var dict2: Table[string, int]
+  for idx in 0..<4:
+    dict2[fmt"{idx}"] = idx + 11
+  let b = initTernaryTreeMap(dict2)
+
+  let c = a.mergeSkip(b, 11)
+  check c.loopGet("0") == some(10)
+  check c.loopGet("1") == some(12)
+  check c.loopGet("2") == some(13)
+  check c.loopGet("3") == some(14)
 
 test "iterator":
   var dict: Table[string, int]
