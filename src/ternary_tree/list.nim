@@ -32,12 +32,14 @@ proc initTernaryTreeList*[T](size: int, offset: int, xs: var seq[TernaryTreeList
     of 2:
       let left = xs[offset]
       let right = xs[offset + 1]
-      TernaryTreeList[T](kind: ternaryTreeBranch, size: 2, left: left, right: right, depth: 2)
+      let size = left.len + right.len
+      TernaryTreeList[T](kind: ternaryTreeBranch, size: size, left: left, right: right, depth: 2)
     of 3:
       let left = xs[offset]
       let middle = xs[offset + 1]
       let right = xs[offset + 2]
-      TernaryTreeList[T](kind: ternaryTreeBranch, size: 3, left: left, middle: middle, right: right, depth: 2)
+      let size = left.len + middle.len + right.len
+      TernaryTreeList[T](kind: ternaryTreeBranch, size: size, left: left, middle: middle, right: right, depth: 2)
     else:
       let divided = divideTernarySizes(size)
 
@@ -698,18 +700,12 @@ proc append*[T](tree: TernaryTreeList[T], item: T, disableBalancing: bool = fals
   if (not disableBalancing):
     result.maybeReblance
 
-proc concat*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): TernaryTreeList[T] =
-  if xs.isNil or xs.len == 0:
-    return ys
-  if ys.isNil or ys.len == 0:
-    return xs
-  result = TernaryTreeList[T](
-    kind: ternaryTreeBranch, size: xs.size + ys.size,
-    depth: decideParentDepth(xs, nil, ys),
-    left: xs,
-    middle: nil,
-    right: ys
-  )
+proc concat*[T](xsGroups: varargs[TernaryTreeList[T]]): TernaryTreeList[T] =
+  var groups: seq[TernaryTreeList[T]]
+  for item in xsGroups:
+    if item.len > 0:
+      groups.add item
+  result = initTernaryTreeList(groups.len, 0, groups)
   result.maybeReblance
 
 proc sameShape*[T](xs: TernaryTreeList[T], ys: TernaryTreeList[T]): bool =
