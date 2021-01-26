@@ -32,14 +32,22 @@ proc initTernaryTreeList*[T](size: int, offset: int, xs: var seq[TernaryTreeList
     of 2:
       let left = xs[offset]
       let right = xs[offset + 1]
-      let size = left.len + right.len
-      TernaryTreeList[T](kind: ternaryTreeBranch, size: size, left: left, right: right, depth: 2)
+      TernaryTreeList[T](
+        kind: ternaryTreeBranch,
+        left: left, right: right,
+        size: left.len + right.len,
+        depth: decideParentDepth(left, right)
+      )
     of 3:
       let left = xs[offset]
       let middle = xs[offset + 1]
       let right = xs[offset + 2]
-      let size = left.len + middle.len + right.len
-      TernaryTreeList[T](kind: ternaryTreeBranch, size: size, left: left, middle: middle, right: right, depth: 2)
+      TernaryTreeList[T](
+        kind: ternaryTreeBranch,
+        left: left, middle: middle, right: right,
+        size: left.len + middle.len + right.len,
+        depth: decideParentDepth(left, middle, right)
+      )
     else:
       let divided = divideTernarySizes(size)
 
@@ -47,7 +55,8 @@ proc initTernaryTreeList*[T](size: int, offset: int, xs: var seq[TernaryTreeList
       let middle = initTernaryTreeList(divided.middle, offset + divided.left, xs)
       let right = initTernaryTreeList(divided.right, offset + divided.left + divided.middle, xs)
       TernaryTreeList[T](
-        kind: ternaryTreeBranch, size: size,
+        kind: ternaryTreeBranch,
+        size: left.len + middle.len + right.len ,
         depth: decideParentDepth(left, middle, right),
         left: left, middle: middle, right: right,
       )

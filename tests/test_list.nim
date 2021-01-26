@@ -101,6 +101,8 @@ test "concat":
   check initTernaryTreeList[int](@[]).concat(data1).formatInline == "(1 _ 2)"
   check data1.concat(initTernaryTreeList[int](@[])).formatInline == "(1 _ 2)"
 
+  discard data1.concat(data2).checkStructure()
+  discard data1.concat(data3).checkStructure()
 
 
 test "check equality":
