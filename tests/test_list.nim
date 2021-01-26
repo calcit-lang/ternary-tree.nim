@@ -87,11 +87,21 @@ test "list insertions":
   check data4.prepend(10).formatInline == "((_ 10 1) (2 _ 3) 4)"
   check data4.append(10).formatInline == "(1 (2 _ 3) (4 10 _))"
 
-  let origin2 = @[1,2]
-  let data2 = initTernaryTreeList(origin2)
-  check data2.concat(data4).formatInline == "((1 _ 2) _ (1 (2 _ 3) 4))"
 
-  check initTernaryTreeList[int](@[]).concat(data2).formatInline == "(1 _ 2)"
+test "concat":
+  let data1 = initTernaryTreeList(@[1, 2])
+  let data2 = initTernaryTreeList(@[3, 4])
+  let data3 = initTernaryTreeList(@[5, 6])
+  let data4 = initTernaryTreeList(@[7, 8])
+
+  check data1.concat(data2).formatInline == "((1 _ 2) _ (3 _ 4))"
+  check data1.concat(data2, data3).formatInline == "((1 _ 2) (3 _ 4) (5 _ 6))"
+  check data1.concat(data2, data3, data4).formatInline == "((1 _ 2) ((3 _ 4) _ (5 _ 6)) (7 _ 8))"
+
+  check initTernaryTreeList[int](@[]).concat(data1).formatInline == "(1 _ 2)"
+  check data1.concat(initTernaryTreeList[int](@[])).formatInline == "(1 _ 2)"
+
+
 
 test "check equality":
 
