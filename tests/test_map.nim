@@ -199,6 +199,6 @@ test "map values":
 
   let data3 = data.mapValues(proc(x: int): int = x + 10)
 
-  check data2.formatInline == data3.formatInline
-
+  discard data3.checkStructure()
   check data2 == data3
+  check data2.formatInline == data3.formatInline

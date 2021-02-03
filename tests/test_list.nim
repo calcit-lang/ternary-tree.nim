@@ -199,5 +199,6 @@ test "map values":
   let data2 = data.mapValues(proc(x: int): int = x * x)
   let data3 = initTernaryTreeList[int](@[1,4,9,16])
 
+  discard data2.checkStructure()
   check data2 == data3
   check data2.formatInline == data3.formatInline
