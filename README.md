@@ -54,6 +54,7 @@ data.append(10)
 data.concat(data)
 data.indexOf(1)
 data.findIndex(proc(x: int): bool = x == 1)
+data.mapValues(proc(x: int): int = x + 1)
 
 data == data
 data.identical(data) # compare by reference
@@ -79,6 +80,7 @@ data.assoc("1", 10)
 data.dissoc("1")
 data.merge(data)
 data.mergeSkip(data, v) # skip a value, mostly for nil
+data.mapValues(proc(x: int): int = x + 1)
 
 data == data
 data.identical(data) # compare by reference

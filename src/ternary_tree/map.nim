@@ -826,3 +826,28 @@ proc sameShape*[K,T](xs: TernaryTreeMap[K,T], ys: TernaryTreeMap[K,T]): bool =
     return false
 
   return true
+
+proc mapValues*[K,T,V](tree: TernaryTreeMap[K,T], f: proc(x: T): V): TernaryTreeMap[K,V] =
+  if tree.isEmpty:
+    return initTernaryTreeMap[K,V]()
+
+  case tree.kind
+  of ternaryTreeLeaf:
+    var newElements = newSeq[TernaryTreeMapKeyValuePair[K, T]](tree.elements.len)
+    for idx, pair in tree.elements:
+      newElements[idx] = (pair.k, f(pair.v))
+
+    return TernaryTreeMap[K,V](
+      kind: ternaryTreeLeaf,
+      hash: tree.hash,
+      elements: newElements
+    )
+  of ternaryTreeBranch:
+    return TernaryTreeMap[K, V](
+      kind: ternaryTreeBranch,
+      maxHash: tree.maxHash,
+      minHash: tree.minHash,
+      left: if tree.left.isNil: nil else: tree.left.mapValues(f),
+      middle: if tree.middle.isNil: nil else: tree.middle.mapValues(f),
+      right: if tree.right.isNil: nil else:tree.right.mapValues(f),
+    )

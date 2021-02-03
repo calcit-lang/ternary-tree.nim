@@ -778,7 +778,7 @@ proc checkStructure*[T](tree: TernaryTreeList[T]): bool =
 
     if tree.depth != decideParentDepth(tree.left, tree.middle, tree.right):
       let x = decideParentDepth(tree.left, tree.middle, tree.right)
-      raise newException(TernaryTreeError, fmt"Bad depth at branch {tree.formatInline}")
+      raise newException(TernaryTreeError, fmt"Bad depth {x} at branch {tree.formatInline}")
 
     discard tree.left.checkStructure
     discard tree.middle.checkStructure
@@ -850,4 +850,24 @@ proc reverse*[T](tree: TernaryTreeList[T]): TernaryTreeList[T] =
       left: tree.right.reverse,
       middle: tree.middle.reverse,
       right: tree.left.reverse
+    )
+
+proc mapValues*[T, V](tree: TernaryTreeList[T], f: proc(x: T): V): TernaryTreeList[V] =
+  if tree.size == 0:
+    return initTernaryTreeList[V]()
+
+  case tree.kind:
+  of ternaryTreeLeaf:
+    TernaryTreeList[V](
+      kind: ternaryTreeLeaf,
+      size: tree.size,
+      value: f(tree.value)
+    )
+  of ternaryTreeBranch:
+    TernaryTreeList[T](
+      kind: ternaryTreeBranch, size: tree.size,
+      depth: tree.depth,
+      left: if tree.left.isNil: nil else: mapValues(tree.left, f),
+      middle: if tree.middle.isNil: nil else:mapValues(tree.middle, f),
+      right: if tree.right.isNil: nil else:mapValues(tree.right, f),
     )
