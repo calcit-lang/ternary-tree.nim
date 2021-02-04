@@ -185,3 +185,20 @@ test "each map":
     i = i + 1
   )
   check i == 100
+
+test "map values":
+  var dict: Table[string, int]
+  for idx in 0..<5:
+    dict[fmt"{idx}"] = idx + 10
+  let data = initTernaryTreeMap(dict)
+
+  var dict2: Table[string, int]
+  for idx in 0..<5:
+    dict2[fmt"{idx}"] = idx + 20
+  let data2 = initTernaryTreeMap(dict2)
+
+  let data3 = data.mapValues(proc(x: int): int = x + 10)
+
+  discard data3.checkStructure()
+  check data2 == data3
+  check data2.formatInline == data3.formatInline

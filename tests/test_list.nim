@@ -193,3 +193,12 @@ test "index of":
   check data.findIndex(proc(x:int):bool = x == 2) == 1
   check data.indexOf(9) == -1
   check data.findIndex(proc(x:int):bool = x == 9) == -1
+
+test "map values":
+  let data = initTernaryTreeList[int](@[1,2,3,4])
+  let data2 = data.mapValues(proc(x: int): int = x * x)
+  let data3 = initTernaryTreeList[int](@[1,4,9,16])
+
+  discard data2.checkStructure()
+  check data2 == data3
+  check data2.formatInline == data3.formatInline
