@@ -1,7 +1,6 @@
 
 import sequtils
 import strutils
-import options
 import strformat
 
 import ./types
@@ -87,20 +86,16 @@ proc seqToStringPath*(xs: seq[PickBranch]): string =
   if unit == 1:
     result = result & shortChartMap[acc + 1]
 
-proc get*[T](tree: TernaryTreeRevision[T], path: string): Option[T] =
-  tree.get(path.stringToSeqPath)
-
-proc get*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch]): Option[T] =
+proc get*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch]): T =
   if tree.isNil:
-    return none(T)
+    raise newException(TernaryTreeError, fmt"nil branch for path {path}")
 
   case tree.kind
   of ternaryTreeLeaf:
     if path.len == 0:
-      return some(tree.value)
+      return tree.value
     else:
-      # raise newException(TernaryTreeError, fmt"missing branch for path {path}")
-      return none(T)
+      raise newException(TernaryTreeError, fmt"missing branch for path {path}")
   of ternaryTreeBranch:
     if path.len == 0:
       return tree.middle.get(@[])
@@ -114,12 +109,37 @@ proc get*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch]): Option[T] =
     of pickRight:
       return tree.right.get(path[1..^1])
 
-proc `[]`*[T](tree: TernaryTreeRevision[T], path: string): Option[T] =
+proc get*[T](tree: TernaryTreeRevision[T], path: string): T =
+  tree.get(path.stringToSeqPath)
+
+proc `[]`*[T](tree: TernaryTreeRevision[T], path: string): T =
   tree.get(path)
 
+proc contains*[T](tree: TernaryTreeRevision[T], path: seq[PickBranch]): bool =
+  if tree.isNil:
+    return false
+
+  case tree.kind
+  of ternaryTreeLeaf:
+    if path.len == 0:
+      return true
+    else:
+      return false
+  of ternaryTreeBranch:
+    if path.len == 0:
+      return tree.middle.contains(@[])
+
+    let pick = path[0]
+    case pick
+    of pickLeft:
+      return tree.left.contains(path[1..^1])
+    of pickMiddle:
+      return tree.middle.contains(path[1..^1])
+    of pickRight:
+      return tree.right.contains(path[1..^1])
+
 proc contains*[T](tree: TernaryTreeRevision[T], path: string): bool =
-  let item = tree.get(path)
-  return item.isSome
+  tree.contains(path.stringToSeqPath())
 
 proc len*[T](tree: TernaryTreeRevision[T]): int =
   if tree.isNil:
@@ -272,7 +292,7 @@ iterator pairs*[T](tree: TernaryTreeRevision[T]): tuple[k: string, v: T] =
   else:
     let ks = tree.keys
     for k in ks:
-      let v = tree.get(k).get
+      let v = tree.get(k)
       yield (k, v)
 
 proc formatInline*(tree: TernaryTreeRevision, basePath: seq[PickBranch] = @[]): string =

@@ -1,7 +1,6 @@
 
 import hashes
 import algorithm
-import options
 import strformat
 import tables
 import unittest
@@ -32,9 +31,8 @@ test "init map":
   check data10.contains("11") == false
 
 
-  check data10.loopGet("1") == some(11)
-  check data10["1"] == some(11)
-  check data10["11"] == none(int)
+  check data10.loopGet("1") == 11
+  check data10["1"] == 11
 
   var emptyData: Table[string, int]
   check initTernaryTreeMap[string, int]() == initTernaryTreeMap(emptyData)
@@ -147,10 +145,10 @@ test "Merge skip":
   let b = initTernaryTreeMap(dict2)
 
   let c = a.mergeSkip(b, 11)
-  check c.loopGet("0") == some(10)
-  check c.loopGet("1") == some(12)
-  check c.loopGet("2") == some(13)
-  check c.loopGet("3") == some(14)
+  check c.loopGet("0") == 10
+  check c.loopGet("1") == 12
+  check c.loopGet("2") == 13
+  check c.loopGet("3") == 14
 
 test "iterator":
   var dict: Table[string, int]
