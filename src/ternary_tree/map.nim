@@ -1,6 +1,5 @@
 
 import tables
-import options
 import hashes
 import strformat
 import algorithm
@@ -261,7 +260,7 @@ proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
 
   return false
 
-proc loopGet*[K, T](originalTree: TernaryTreeMap[K, T], item: K): Option[T] =
+proc loopGet*[K, T](originalTree: TernaryTreeMap[K, T], item: K): T =
   let hx = item.hash
 
   var tree = originalTree
@@ -271,8 +270,8 @@ proc loopGet*[K, T](originalTree: TernaryTreeMap[K, T], item: K): Option[T] =
     if tree.kind == ternaryTreeLeaf:
       for pair in tree.elements:
         if pair.k == item:
-          return some(pair.v)
-      return none(T)
+          return pair.v
+      raise newException(TernaryTreeError, fmt"Cannot find target of {item} at leaf")
 
     # echo "looking for: ", hx, " ", item, " in ", tree.formatInline
 
@@ -281,8 +280,8 @@ proc loopGet*[K, T](originalTree: TernaryTreeMap[K, T], item: K): Option[T] =
         if tree.left.hash == hx:
           for pair in tree.left.elements:
             if pair.k == item:
-              return some(pair.v)
-          return none(T)
+              return pair.v
+          raise newException(TernaryTreeError, fmt"Cannot find target of {item} at left branch")
       elif hx >= tree.left.minHash and hx <= tree.left.maxHash:
         tree = tree.left
         continue
@@ -292,8 +291,8 @@ proc loopGet*[K, T](originalTree: TernaryTreeMap[K, T], item: K): Option[T] =
         if tree.middle.hash == hx:
           for pair in tree.middle.elements:
             if pair.k == item:
-              return some(pair.v)
-          return none(T)
+              return pair.v
+          raise newException(TernaryTreeError, fmt"Cannot find target of {item} at middle branch")
       elif hx >= tree.middle.minHash and hx <= tree.middle.maxHash:
         tree = tree.middle
         continue
@@ -303,18 +302,18 @@ proc loopGet*[K, T](originalTree: TernaryTreeMap[K, T], item: K): Option[T] =
         if tree.right.hash == hx:
           for pair in tree.right.elements:
             if pair.k == item:
-              return some(pair.v)
-          return none(T)
+              return pair.v
+          raise newException(TernaryTreeError, fmt"Cannot find target of {item} at right branch")
       elif hx >= tree.right.minHash and hx <= tree.right.maxHash:
         tree = tree.right
         continue
 
-    return none(T)
+    raise newException(TernaryTreeError, fmt"Cannot find target of {item}, no more branches")
 
-  return none(T)
+  raise newException(TernaryTreeError, fmt"Cannot find target of {item} at nil")
 
 
-proc `[]`*[K, T](tree: TernaryTreeMap[K, T], key: K): Option[T] =
+proc `[]`*[K, T](tree: TernaryTreeMap[K, T], key: K): T =
   tree.loopGet(key)
 
 # leaves on the left has smaller hashes

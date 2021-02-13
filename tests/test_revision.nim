@@ -1,17 +1,16 @@
 
 import unittest
-import options
 import strformat
 
 import ternary_tree
 
-test "init list":
+test "init revision":
   # check ($initTernaryTreeRevision[int](@[1,2,3,4]) == "TernaryTreeList[4, 3]")
 
   let data = initTernaryTreeRevision[int](@[1,2,3,4,5,6,7,8,9])
   # echo data.formatInline
 
-  check data.get(@[pickLeft]) == some(2)
+  check data.get(@[pickLeft]) == 2
   check data.len == 9
 
   check seqToStringPath(@[pickLeft, pickMiddle]) == "d"
