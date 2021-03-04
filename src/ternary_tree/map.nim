@@ -224,39 +224,51 @@ proc toOrderedHashEntries*[K, T](tree: TernaryTreeMap[K, T]): seq[TernaryTreeMap
   collectOrderedHashEntries(tree, acc)
   return acc
 
-proc contains*[K, T](tree: TernaryTreeMap[K, T], item: K): bool =
-  if tree.isNil:
-    return false
-
-  if tree.kind == ternaryTreeLeaf:
-    for pair in tree.elements:
-      if pair.k == item:
-        return true
+proc contains*[K, T](originalTree: TernaryTreeMap[K, T], item: K): bool =
+  if originalTree.isNil:
     return false
 
   let hx = item.hash
-  # echo "looking for: ", hx, " ", item, " in ", tree.formatInline(true)
-  if not tree.left.isNil:
-    if tree.left.kind == ternaryTreeLeaf:
-      if tree.left.hash == hx:
-        return true
-    elif hx >= tree.left.minHash and hx <= tree.left.maxHash:
-      return tree.left.contains(item)
+  var tree = originalTree
 
-  if not tree.middle.isNil:
-    if tree.middle.kind == ternaryTreeLeaf:
-      if tree.middle.hash == hx:
-        return true
-    elif hx >= tree.middle.minHash and hx <= tree.middle.maxHash:
-      return tree.middle.contains(item)
+  while tree.isNil.not:
 
-  if not tree.right.isNil:
-    # echo "right..."
-    if tree.right.kind == ternaryTreeLeaf:
-      if tree.right.hash == hx:
-        return true
-    elif hx >= tree.right.minHash and hx <= tree.right.maxHash:
-      return tree.right.contains(item)
+    if tree.kind == ternaryTreeLeaf:
+      for pair in tree.elements:
+        if pair.k == item:
+          return true
+      return false
+
+    # echo "looking for: ", hx, " ", item, " in ", tree.formatInline(true)
+    if not tree.left.isNil:
+      if tree.left.kind == ternaryTreeLeaf:
+        if tree.left.hash == hx:
+          tree = tree.left
+          continue
+      elif hx >= tree.left.minHash and hx <= tree.left.maxHash:
+        tree = tree.left
+        continue
+
+    if not tree.middle.isNil:
+      if tree.middle.kind == ternaryTreeLeaf:
+        if tree.middle.hash == hx:
+          tree = tree.middle
+          continue
+      elif hx >= tree.middle.minHash and hx <= tree.middle.maxHash:
+        tree = tree.middle
+        continue
+
+    if not tree.right.isNil:
+      # echo "right..."
+      if tree.right.kind == ternaryTreeLeaf:
+        if tree.right.hash == hx:
+          tree = tree.right
+          continue
+      elif hx >= tree.right.minHash and hx <= tree.right.maxHash:
+        tree = tree.right
+        continue
+
+    return false
 
   return false
 
