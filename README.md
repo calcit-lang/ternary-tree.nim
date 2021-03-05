@@ -73,6 +73,7 @@ data.len
 data.contains("1")
 data.get("1")
 data["1"]
+data.loopGet("1", 0) # use default value
 data.toPairs()
 data.keys()
 

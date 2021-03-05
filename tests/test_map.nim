@@ -32,6 +32,7 @@ test "init map":
 
 
   check data10.loopGet("1") == 11
+  check data10.loopGetDefault("100", 0) == 0
   check data10["1"] == 11
 
   var emptyData: Table[string, int]
