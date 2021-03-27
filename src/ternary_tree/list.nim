@@ -868,6 +868,6 @@ proc mapValues*[T, V](tree: TernaryTreeList[T], f: proc(x: T): V): TernaryTreeLi
       kind: ternaryTreeBranch, size: tree.size,
       depth: tree.depth,
       left: if tree.left.isNil: nil else: mapValues(tree.left, f),
-      middle: if tree.middle.isNil: nil else:mapValues(tree.middle, f),
-      right: if tree.right.isNil: nil else:mapValues(tree.right, f),
+      middle: if tree.middle.isNil: nil else: mapValues(tree.middle, f),
+      right: if tree.right.isNil: nil else: mapValues(tree.right, f),
     )
